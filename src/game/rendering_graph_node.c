@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include "config/config_world.h"
+#include "quasilight.h"
 
 /**
  * This file contains the code that processes the scene graph for rendering.
@@ -641,28 +642,65 @@ void geo_process_switch(struct GraphNodeSwitchCase *node) {
 Mat4 gCameraTransform;
 
 Lights1 defaultLight = gdSPDefLights1(
-    0x3F, 0x3F, 0x3F, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00
+    0x3F, 0x3F, 0x3F, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00
 );
 
 Vec3f globalLightDirection = { 0x28, 0x28, 0x28 };
 
+//Lights1 my_light = gdSPDefLights1(
+//        /* ambient color red */
+//        255, 0, 0,
+//        /* green light from the upper left */
+//        0, 255, 0,   -80, 80, 0);
+//
+//Lights0 my_ambient_only_light = gdSPDefLights0(
+//        /* blue ambient light */
+//        0, 0, 255);
+
+Lights2 my_light2 = gdSPDefLights2(
+        /* ambient color*/
+        50, 50, 50,
+        /* bisexual blue from the upper left */
+        50, 50, 50,   0, 127, 0,
+        /* bisexual pink from the lower right */
+        255, 0, 0,   0, -127, 0);
+
+Lights1 templight = gdSPDefLights1(
+        50, 50, 50,
+        255, 255, 0, 0, 127, 0
+);
+
 void setup_global_light() {
-    Lights1* curLight = (Lights1*)alloc_display_list(sizeof(Lights1));
-    bcopy(&defaultLight, curLight, sizeof(Lights1));
+    //Lights1* curLight = (Lights1*)alloc_display_list(sizeof(Lights1));
+    //bcopy(&defaultLight, curLight, sizeof(Lights1));
 
 #ifdef WORLDSPACE_LIGHTING
-    curLight->l->l.dir[0] = (s8)(globalLightDirection[0]);
-    curLight->l->l.dir[1] = (s8)(globalLightDirection[1]);
-    curLight->l->l.dir[2] = (s8)(globalLightDirection[2]);
+    //curLight->l->l.dir[0] = (s8)(globalLightDirection[0]);
+    //curLight->l->l.dir[1] = (s8)(globalLightDirection[1]);
+    //curLight->l->l.dir[2] = (s8)(globalLightDirection[2]);
 #else
-    Vec3f transformedLightDirection;
-    linear_mtxf_transpose_mul_vec3f(gCameraTransform, transformedLightDirection, globalLightDirection);
-    curLight->l->l.dir[0] = (s8)(transformedLightDirection[0]);
-    curLight->l->l.dir[1] = (s8)(transformedLightDirection[1]);
-    curLight->l->l.dir[2] = (s8)(transformedLightDirection[2]);
+    //Vec3f transformedLightDirection;
+    //linear_mtxf_transpose_mul_vec3f(gCameraTransform, transformedLightDirection, globalLightDirection);
+    //curLight->l->l.dir[0] = (s8)(transformedLightDirection[0]);
+    //curLight->l->l.dir[1] = (s8)(transformedLightDirection[1]);
+    //curLight->l->l.dir[2] = (s8)(transformedLightDirection[2]);
 #endif
 
-    gSPSetLights1(gDisplayListHead++, (*curLight));
+    vector_s8 dir = qsl_nearest_pl_direction(gMarioState->pos);
+    color_s8 col = qsl_nearest_pl_color(gMarioState->pos);
+
+    templight.l->l.dir[0] = dir.x;
+    templight.l->l.dir[1] = dir.y;
+    templight.l->l.dir[2] = dir.z;
+
+    templight.l->l.col[0] = col.r;
+    templight.l->l.col[1] = col.g;
+    templight.l->l.col[2] = col.b;
+    templight.l->l.colc[0] = col.r;
+    templight.l->l.colc[1] = col.g;
+    templight.l->l.colc[2] = col.b;
+
+    gSPSetLights1(gDisplayListHead++, templight);
 }
 
 /**

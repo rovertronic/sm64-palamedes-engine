@@ -15,7 +15,7 @@
  * By modifying `globalLightDirection`, you can choose the direction that points TOWARDS the light,
  * but keep in mind that this direction should be normalized to roughly ~127 if changed.
  */
-// #define WORLDSPACE_LIGHTING
+#define WORLDSPACE_LIGHTING
 
 /**
  * Show a watermark on the title screen that reads "Made with HackerSM64", instead of the copyright message.

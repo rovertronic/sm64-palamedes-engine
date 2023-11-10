@@ -1,0 +1,11 @@
+extern const GeoLayout test_area_1_geo[];
+extern const GeoLayout test_area_1[];
+extern const Collision test_area_1_collision[];
+extern const MacroObject test_area_1_macro_objs[];
+extern Lights1 test_dl_f3dlite_material_lights;
+extern u8 test_dl_tiles_rgba16[];
+extern Vtx test_dl_Plane_mesh_layer_1_vtx_0[362];
+extern Gfx test_dl_Plane_mesh_layer_1_tri_0[];
+extern Gfx mat_test_dl_f3dlite_material[];
+extern Gfx test_dl_Plane_mesh_layer_1[];
+extern Gfx test_dl_material_revert_render_settings[];
