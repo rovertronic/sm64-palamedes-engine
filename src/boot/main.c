@@ -23,6 +23,7 @@
 #include "game/puppylights.h"
 #include "game/profiling.h"
 #include "game/emutest.h"
+#include "game/quasilight.h"
 
 // Message IDs
 enum MessageIDs {
@@ -39,6 +40,7 @@ OSThread gIdleThread;
 OSThread gMainThread;
 OSThread gGameLoopThread;
 OSThread gSoundThread;
+OSThread gQuasilightThread;
 
 OSIoMesg gDmaIoMesg;
 OSMesg gMainReceivedMesg;
@@ -345,6 +347,11 @@ void check_stack_validity(void) {
 #endif
 }
 #endif
+
+void create_thread_10_quasilight(void) {
+    create_thread(&gQuasilightThread, THREAD_10_QUASILIGHT, qsl_update_terrain_lighting_thread10, NULL, gThread10Stack + THREAD10_STACK, 5);
+    osStartThread(&gQuasilightThread);
+}
 
 
 extern void crash_screen_init(void);

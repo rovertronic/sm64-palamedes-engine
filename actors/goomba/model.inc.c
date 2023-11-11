@@ -155,8 +155,8 @@ static const Vtx goomba_seg8_vertex_0801B238[] = {
 
 // 0x0801B2E8 - 0x0801B560
 const Gfx goomba_seg8_dl_0801B2E8[] = {
-    gsSPLightColor(LIGHT_1, 0xffffffff),
-    gsSPLightColor(LIGHT_2, 0x7f7f7fff),
+    ////gsSPLightColor(LIGHT_1, 0xffffffff),
+    ////gsSPLightColor(LIGHT_2, 0x7f7f7fff),
     gsSPVertex(goomba_seg8_vertex_0801AD48, 15, 0),
     gsSP2Triangles( 0,  1,  2, 0x0,  3,  4,  5, 0x0),
     gsSP2Triangles( 6,  5,  4, 0x0,  5,  7,  3, 0x0),
@@ -772,8 +772,8 @@ static const Vtx goomba_seg8_vertex_0801CDF0[] = {
 
 // 0x0801CE20 - 0x0801CF78
 const Gfx goomba_seg8_dl_0801CE20[] = {
-    gsSPLightColor(LIGHT_1, 0x542e10ff),
-    gsSPLightColor(LIGHT_2, 0x150b04ff),
+    //gsSPLightColor(LIGHT_1, 0x542e10ff),
+    //gsSPLightColor(LIGHT_2, 0x150b04ff),
     gsSPVertex(goomba_seg8_vertex_0801B700, 16, 0),
     gsSP2Triangles( 0,  1,  2, 0x0,  0,  2,  3, 0x0),
     gsSP2Triangles( 4,  5,  6, 0x0,  4,  6,  7, 0x0),
@@ -801,8 +801,8 @@ const Gfx goomba_seg8_dl_0801CE20[] = {
 
 // 0x0801CF78 - 0x0801D0D0
 const Gfx goomba_seg8_dl_0801CF78[] = {
-    gsSPLightColor(LIGHT_1, 0x613413ff),
-    gsSPLightColor(LIGHT_2, 0x180d04ff),
+    //gsSPLightColor(LIGHT_1, 0x613413ff),
+    //gsSPLightColor(LIGHT_2, 0x180d04ff),
     gsSPVertex(goomba_seg8_vertex_0801BA50, 15, 0),
     gsSP2Triangles( 0,  1,  2, 0x0,  0,  2,  3, 0x0),
     gsSP2Triangles( 1,  4,  5, 0x0,  1,  5,  2, 0x0),
@@ -830,8 +830,8 @@ const Gfx goomba_seg8_dl_0801CF78[] = {
 
 // 0x0801D0D0 - 0x0801D360
 const Gfx goomba_seg8_dl_0801D0D0[] = {
-    gsSPLightColor(LIGHT_1, 0x774220ff),
-    gsSPLightColor(LIGHT_2, 0x1d1008ff),
+    //gsSPLightColor(LIGHT_1, 0x774220ff),
+    //gsSPLightColor(LIGHT_2, 0x1d1008ff),
     gsSPVertex(goomba_seg8_vertex_0801BDC0, 16, 0),
     gsSP2Triangles( 0,  1,  2, 0x0,  0,  2,  3, 0x0),
     gsSP2Triangles( 4,  5,  6, 0x0,  4,  6,  7, 0x0),
@@ -882,8 +882,8 @@ const Gfx goomba_seg8_dl_0801D0D0[] = {
 
 // 0x0801D360 - 0x0801D760
 const Gfx goomba_seg8_dl_0801D360[] = {
-    gsSPLightColor(LIGHT_1, 0xdeb44eff),
-    gsSPLightColor(LIGHT_2, 0x372d13ff),
+    //gsSPLightColor(LIGHT_1, 0xdeb44eff),
+    //gsSPLightColor(LIGHT_2, 0x372d13ff),
     gsSPVertex(goomba_seg8_vertex_0801C620, 16, 0),
     gsSP2Triangles( 0,  1,  2, 0x0,  0,  2,  3, 0x0),
     gsSP2Triangles( 4,  5,  1, 0x0,  4,  1,  0, 0x0),
@@ -957,6 +957,6 @@ const Gfx goomba_seg8_dl_0801D360[] = {
 
 // 0x0801D760 - 0x0801D770
 const Gfx goomba_seg8_dl_0801D760[] = {
-    gsSPNumLights(NUMLIGHTS_1),
+    //gsSPNumLights(NUMLIGHTS_1),
     gsSPEndDisplayList(),
 };

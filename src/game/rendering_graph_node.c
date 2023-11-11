@@ -642,33 +642,16 @@ void geo_process_switch(struct GraphNodeSwitchCase *node) {
 Mat4 gCameraTransform;
 
 Lights1 defaultLight = gdSPDefLights1(
-    0x3F, 0x3F, 0x3F, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00
+    0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x00, 127, 0x00
 );
 
-Vec3f globalLightDirection = { 0x28, 0x28, 0x28 };
-
-//Lights1 my_light = gdSPDefLights1(
-//        /* ambient color red */
-//        255, 0, 0,
-//        /* green light from the upper left */
-//        0, 255, 0,   -80, 80, 0);
-//
-//Lights0 my_ambient_only_light = gdSPDefLights0(
-//        /* blue ambient light */
-//        0, 0, 255);
-
-Lights2 my_light2 = gdSPDefLights2(
-        /* ambient color*/
-        50, 50, 50,
-        /* bisexual blue from the upper left */
-        50, 50, 50,   0, 127, 0,
-        /* bisexual pink from the lower right */
-        255, 0, 0,   0, -127, 0);
-
-Lights1 templight = gdSPDefLights1(
-        50, 50, 50,
-        255, 255, 0, 0, 127, 0
+Lights2 templight = gdSPDefLights2(
+        0, 0, 0,
+        0, 0, 0, 0, 127, 0,
+        80, 80, 80, 0, 127, 0
 );
+
+u8 nomore = FALSE;
 
 void setup_global_light() {
     //Lights1* curLight = (Lights1*)alloc_display_list(sizeof(Lights1));
@@ -686,21 +669,17 @@ void setup_global_light() {
     //curLight->l->l.dir[2] = (s8)(transformedLightDirection[2]);
 #endif
 
-    vector_s8 dir = qsl_nearest_pl_direction(gMarioState->pos);
-    color_s8 col = qsl_nearest_pl_color(gMarioState->pos);
+    //qsl_update_terrain_lighting();
 
-    templight.l->l.dir[0] = dir.x;
-    templight.l->l.dir[1] = dir.y;
-    templight.l->l.dir[2] = dir.z;
+    if (nomore == FALSE) {
+        
+    if (gMarioState->controller->buttonPressed & L_TRIG) {
+        create_thread_10_quasilight();
+        nomore = TRUE;
+    }
+    }
 
-    templight.l->l.col[0] = col.r;
-    templight.l->l.col[1] = col.g;
-    templight.l->l.col[2] = col.b;
-    templight.l->l.colc[0] = col.r;
-    templight.l->l.colc[1] = col.g;
-    templight.l->l.colc[2] = col.b;
-
-    gSPSetLights1(gDisplayListHead++, templight);
+    gSPSetLights1(gDisplayListHead++, defaultLight);
 }
 
 /**

@@ -15,6 +15,7 @@ enum VIModes {
 #define THREAD4_STACK 0x2000
 #define THREAD5_STACK 0x2000
 #define THREAD6_STACK 0x400
+#define THREAD10_STACK 0x2000
 
 enum ThreadID {
     THREAD_0,
@@ -27,6 +28,7 @@ enum ThreadID {
     THREAD_7_HVQM,
     THREAD_8_TIMEKEEPER,
     THREAD_9_DA_COUNTER,
+    THREAD_10_QUASILIGHT,
 };
 
 struct RumbleData {
@@ -111,5 +113,6 @@ void set_vblank_handler(s32 index, struct VblankHandler *handler, OSMesgQueue *q
 void dispatch_audio_sptask(struct SPTask *spTask);
 void exec_display_list(struct SPTask *spTask);
 void change_vi(OSViMode *mode, int width, int height);
+void create_thread_10_quasilight(void);
 
 #endif // MAIN_H

@@ -95,6 +95,9 @@ for file in lightFiles:
                 index += 1
                 continue
 
+            if curLine.startswith("gsSPSetGeometryMode(G_LIGHTING),"):
+                fileLines[index] = "gsSPClearGeometryMode(G_LIGHTING),"
+
             if curLine.startswith("gsSPSetLights1("):
                 structName = curLine.split("(")[1].split(")")[0] # Get string between ( and )
                 if structName in lightStructs.keys():
@@ -102,8 +105,8 @@ for file in lightFiles:
                     args = lightStructs[structName]
                     light1Args = args[3]*0x1000000 + args[4]*0x10000 + args[5]*0x100 + 0xFF
                     light2Args = args[0]*0x1000000 + args[1]*0x10000 + args[2]*0x100 + 0xFF
-                    fileLines[index] = "    gsSPLightColor(LIGHT_1, 0x%x),\n" % light1Args
-                    fileLines.insert(index+1,"    gsSPLightColor(LIGHT_2, 0x%x),\n" % light2Args)
+                    fileLines[index] = ""#"    gsSPLightColor(LIGHT_1, 0x%x),\n" % light1Args
+                    #fileLines.insert(index+1,"    gsSPLightColor(LIGHT_2, 0x%x),\n" % light2Args)
                     index_delta(curDL, dl_index, 1)
                     dl_index += 2 # gsSPSetLights1 expands to 3 commands, gsSPLightColor is 2 commands each
                     index += 1

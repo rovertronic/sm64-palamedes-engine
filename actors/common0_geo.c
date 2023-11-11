@@ -3,6 +3,7 @@
 #include "geo_commands.h"
 
 #include "make_const_nonconst.h"
+#include "src/game/level_geo.h"
 
 #include "common1.h"
 #include "common0.h"
