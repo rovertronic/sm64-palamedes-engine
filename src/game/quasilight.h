@@ -15,6 +15,11 @@ typedef struct {
     u8 b;
 } color_u8;
 
+typedef struct {
+    Vec3f position;
+    Vec3f normal;
+} float_vertex;
+
 vector_s8 qsl_pl_direction(Vec3f position);
 color_u8 qsl_pl_color(Vec3f position);
 color_u8 qsl_ambient_color(Vec3f position);

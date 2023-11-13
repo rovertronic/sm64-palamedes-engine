@@ -18,7 +18,7 @@ to ensure that environment lighting does not lag general gameplay.
 #define CLAMP_0(x) ((x < 0) ? 0 : x)
 #define CLAMP_255(x) ((x > 255) ? 255 : x)
 
-Vec3f qsl_normal_pool[10000];
+float_vertex qsl_vertex_pool[10000];
 int qsl_vertex_index = 0;
 
 Vec3f qsl_global_sun_direction = {0.0f, 1.0f, 0.0f};
@@ -110,19 +110,21 @@ u8 penis_debug = 0;
 
 void qsl_init_vtx_list(Vtx * terrain, int size) {
     for (int i = 0; i < size; i++) {
-        qsl_normal_pool[qsl_vertex_index][0] = terrain[i].n.n[0];
-        qsl_normal_pool[qsl_vertex_index][1] = terrain[i].n.n[1];
-        qsl_normal_pool[qsl_vertex_index][2] = terrain[i].n.n[2];
-        vec3f_normalize(qsl_normal_pool[qsl_vertex_index]);
+        qsl_vertex_pool[qsl_vertex_index].normal[0] = terrain[i].n.n[0];
+        qsl_vertex_pool[qsl_vertex_index].normal[1] = terrain[i].n.n[1];
+        qsl_vertex_pool[qsl_vertex_index].normal[2] = terrain[i].n.n[2];
+        vec3f_normalize(qsl_vertex_pool[qsl_vertex_index].normal);
 
+        qsl_vertex_pool[qsl_vertex_index].position[0] = terrain[i].v.ob[0];
+        qsl_vertex_pool[qsl_vertex_index].position[1] = terrain[i].v.ob[1];
+        qsl_vertex_pool[qsl_vertex_index].position[2] = terrain[i].v.ob[2];
         qsl_vertex_index ++;
     }
 };
 
 void qsl_update_vtx_list(Vtx * terrain, int size) {
     for (int i = 0; i < size; i++) {
-        Vec3f vert_pos = {terrain[i].v.ob[0],terrain[i].v.ob[1],terrain[i].v.ob[2]};
-        color_u8 color = qsl_color_env(vert_pos, qsl_normal_pool[qsl_vertex_index]);
+        color_u8 color = qsl_color_env(qsl_vertex_pool[qsl_vertex_index].position, qsl_vertex_pool[qsl_vertex_index].normal);
         terrain[i].v.cn[0] = color.r;
         terrain[i].v.cn[1] = color.g;
         terrain[i].v.cn[2] = color.b;
