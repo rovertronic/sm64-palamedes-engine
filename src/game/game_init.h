@@ -38,6 +38,7 @@ extern OSMesgQueue gGfxVblankQueue;
 extern OSMesg gGameMesgBuf[1];
 extern OSMesg gGfxMesgBuf[1];
 extern struct VblankHandler gGameVblankHandler;
+extern struct VblankHandler gVideoVblankHandler;
 extern uintptr_t gPhysicalFramebuffers[3];
 extern uintptr_t gPhysicalZBuffer;
 extern void *gMarioAnimsMemAlloc;
@@ -90,5 +91,6 @@ void end_master_display_list(void);
 void render_init(void);
 void select_gfx_pool(void);
 void display_and_vsync(void);
+void thread11_graphics(void);
 
 #endif // GAME_INIT_H

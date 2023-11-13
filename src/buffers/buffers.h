@@ -20,6 +20,7 @@ extern u8 gThread5Stack[THREAD5_STACK];
 extern u8 gThread6Stack[THREAD6_STACK];
 #endif
 extern u8 gThread10Stack[THREAD10_STACK];
+extern u8 gThread11Stack[THREAD11_STACK];
 
 extern u8 gGfxSPTaskYieldBuffer[];
 

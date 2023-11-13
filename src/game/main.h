@@ -16,6 +16,7 @@ enum VIModes {
 #define THREAD5_STACK 0x2000
 #define THREAD6_STACK 0x400
 #define THREAD10_STACK 0x2000
+#define THREAD11_STACK 0x2000
 
 enum ThreadID {
     THREAD_0,
@@ -29,6 +30,7 @@ enum ThreadID {
     THREAD_8_TIMEKEEPER,
     THREAD_9_DA_COUNTER,
     THREAD_10_QUASILIGHT,
+    THREAD_11_GRAPHICS,
 };
 
 struct RumbleData {
@@ -62,6 +64,7 @@ extern OSThread gRumblePakThread;
 
 extern OSPfs gRumblePakPfs;
 #endif
+extern OSThread gVideoLoopThread;
 
 extern OSMesgQueue gPIMesgQueue;
 extern OSMesgQueue gIntrMesgQueue;

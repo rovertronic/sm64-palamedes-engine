@@ -993,10 +993,5 @@ struct LevelCommand *level_script_execute(struct LevelCommand *cmd) {
         LevelScriptJumpTable[sCurrentCmd->type]();
     }
 
-    init_rcp(CLEAR_ZBUFFER);
-    render_game();
-    end_master_display_list();
-    alloc_display_list(0);
-
     return sCurrentCmd;
 }

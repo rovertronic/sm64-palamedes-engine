@@ -41,6 +41,7 @@ OSThread gMainThread;
 OSThread gGameLoopThread;
 OSThread gSoundThread;
 OSThread gQuasilightThread;
+OSThread gVideoLoopThread;
 
 OSIoMesg gDmaIoMesg;
 OSMesg gMainReceivedMesg;
@@ -349,7 +350,7 @@ void check_stack_validity(void) {
 #endif
 
 void create_thread_10_quasilight(void) {
-    create_thread(&gQuasilightThread, THREAD_10_QUASILIGHT, qsl_update_terrain_lighting_thread10, NULL, gThread10Stack + THREAD10_STACK, 5);
+    create_thread(&gQuasilightThread, THREAD_10_QUASILIGHT, qsl_update_terrain_lighting_thread10, NULL, gThread10Stack + THREAD10_STACK, 1);
     osStartThread(&gQuasilightThread);
 }
 
@@ -410,6 +411,8 @@ void thread3_main(UNUSED void *arg) {
 
     create_thread(&gGameLoopThread, THREAD_5_GAME_LOOP, thread5_game_loop, NULL, gThread5Stack + THREAD5_STACK, 10);
     osStartThread(&gGameLoopThread);
+
+    create_thread(&gVideoLoopThread, THREAD_11_GRAPHICS, thread11_graphics, NULL, gThread11Stack + 0x2000, 2);
 
     while (TRUE) {
         OSMesg msg;

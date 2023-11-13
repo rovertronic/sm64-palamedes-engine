@@ -57,12 +57,15 @@ s8 gEepromProbe;
 s8 gSramProbe;
 #endif
 OSMesgQueue gGameVblankQueue;
+OSMesgQueue gVideoVblankQueue;
 OSMesgQueue gGfxVblankQueue;
 OSMesg gGameMesgBuf[1];
+OSMesg gVideoMesgBuf[1];
 OSMesg gGfxMesgBuf[1];
 
 // Vblank Handler
 struct VblankHandler gGameVblankHandler;
+struct VblankHandler gVideoVblankHandler;
 
 // Buffers
 uintptr_t gPhysicalFramebuffers[3];
@@ -76,6 +79,7 @@ struct DmaHandlerList gDemoInputsBuf;
 
 // General timer that runs as the game starts
 u32 gGlobalTimer = 0;
+u32 gVideoTimer = 0;
 u8 *gAreaSkyboxStart[AREA_COUNT];
 u8 *gAreaSkyboxEnd[AREA_COUNT];
 
@@ -411,14 +415,14 @@ void render_init(void) {
     if (gEmulator & INSTANT_INPUT_BLACKLIST) {
         sRenderingFramebuffer++;
     }
-    gGlobalTimer++;
+    gVideoTimer++;
 }
 
 /**
  * Selects the location of the F3D output buffer (gDisplayListHead).
  */
 void select_gfx_pool(void) {
-    gGfxPool = &gGfxPools[gGlobalTimer % ARRAY_COUNT(gGfxPools)];
+    gGfxPool = &gGfxPools[gVideoTimer % ARRAY_COUNT(gGfxPools)];
     set_segment_base_addr(SEGMENT_RENDER, gGfxPool->buffer);
     gGfxSPTask = &gGfxPool->spTask;
     gDisplayListHead = gGfxPool->buffer;
@@ -440,11 +444,11 @@ void display_and_vsync(void) {
     }
     exec_display_list(&gGfxPool->spTask);
 #ifndef UNLOCK_FPS
-    osRecvMesg(&gGameVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
+    //osRecvMesg(&gGameVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
 #endif
     osViSwapBuffer((void *) PHYSICAL_TO_VIRTUAL(gPhysicalFramebuffers[sRenderedFramebuffer]));
 #ifndef UNLOCK_FPS
-    osRecvMesg(&gGameVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
+    //osRecvMesg(&gGameVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
 #endif
     // Skip swapping buffers on inaccurate emulators other than VC so that they display immediately as the Gfx task finishes
     if (gEmulator & INSTANT_INPUT_BLACKLIST) {
@@ -455,7 +459,7 @@ void display_and_vsync(void) {
             sRenderingFramebuffer = 0;
         }
     }
-    gGlobalTimer++;
+    gVideoTimer++;
 }
 
 #if !defined(DISABLE_DEMO) && defined(KEEP_MARIO_HEAD)
@@ -719,6 +723,7 @@ void setup_game_memory(void) {
     // Create Mesg Queues
     osCreateMesgQueue(&gGfxVblankQueue, gGfxMesgBuf, ARRAY_COUNT(gGfxMesgBuf));
     osCreateMesgQueue(&gGameVblankQueue, gGameMesgBuf, ARRAY_COUNT(gGameMesgBuf));
+    osCreateMesgQueue(&gVideoVblankQueue, gVideoMesgBuf, ARRAY_COUNT(gVideoMesgBuf));
     // Setup z buffer and framebuffer
     gPhysicalZBuffer = VIRTUAL_TO_PHYSICAL(gZBuffer);
     gPhysicalFramebuffers[0] = VIRTUAL_TO_PHYSICAL(gFramebuffer0);
@@ -746,6 +751,8 @@ void setup_game_memory(void) {
  * Main game loop thread. Runs forever as long as the game continues.
  */
 void thread5_game_loop(UNUSED void *arg) {
+    u32 thread_11_started = FALSE;
+
     setup_game_memory();
 #if ENABLE_RUMBLE
     init_rumble_pak_scheduler_queue();
@@ -772,9 +779,10 @@ void thread5_game_loop(UNUSED void *arg) {
 #ifdef WIDE
     gConfig.widescreen = save_file_get_widescreen_mode();
 #endif
-    render_init();
 
     while (TRUE) {
+        u32 first = osGetTime();
+
         profiler_frame_setup();
         // If the reset timer is active, run the process to reset the game.
         if (gResetTimer != 0) {
@@ -794,7 +802,6 @@ void thread5_game_loop(UNUSED void *arg) {
         }
 
         audio_game_loop_tick();
-        select_gfx_pool();
         read_controller_inputs(THREAD_5_GAME_LOOP);
         profiler_update(PROFILER_TIME_CONTROLLERS, 0);
         profiler_collision_reset();
@@ -807,20 +814,47 @@ void thread5_game_loop(UNUSED void *arg) {
         puppyprint_profiler_process();
 #endif
 
-        display_and_vsync();
-#ifdef VANILLA_DEBUG
-        // when debug info is enabled, print the "BUF %d" information.
-        if (gShowDebugText) {
-            // subtract the end of the gfx pool with the display list to obtain the
-            // amount of free space remaining.
-            print_text_fmt_int(180, 20, "BUF %d", gGfxPoolEnd - (u8 *) gDisplayListHead);
+        gGlobalTimer++;
+        //profiler_log_thread5_time(BEFORE_DISPLAY_LISTS);
+        //profiler_log_thread5_time(AFTER_DISPLAY_LISTS);
+        //profiler_log_thread5_time(THREAD5_END);
+        //gGameTime = osGetTime() - first;
+        if (!thread_11_started) {
+            thread_11_started = TRUE;
+            osStartThread(&gVideoLoopThread);
         }
-#endif
+
+        osRecvMesg(&gGameVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
+        osRecvMesg(&gGameVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
+
+
 #if 0
         if (gPlayer1Controller->buttonPressed & L_TRIG) {
             osStartThread(&hvqmThread);
             osRecvMesg(&gDmaMesgQueue, NULL, OS_MESG_BLOCK);
         }
 #endif
+    }
+}
+
+
+void thread11_graphics(void) {
+
+    set_vblank_handler(3, &gVideoVblankHandler, &gVideoVblankQueue, (OSMesg) 1);
+    render_init();
+
+    while (TRUE) {
+        u32 first = osGetTime();
+        //profiler_log_thread9_time(THREAD9_START);
+        select_gfx_pool();
+        init_rcp(CLEAR_ZBUFFER);
+        render_game();
+        end_master_display_list();
+        alloc_display_list(0);
+        //gVideoTime = osGetTime() - first;
+        //rofiler_log_thread9_time(THREAD9_END);
+
+        display_and_vsync();
+        osRecvMesg(&gVideoVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
     }
 }
