@@ -41,6 +41,9 @@ Gfx *gDisplayListHead;
 u8 *gGfxPoolEnd;
 struct GfxPool *gGfxPool;
 
+u32 gMoveSpeed = 1;
+f32 gLerpSpeed = 1;
+
 // OS Controllers
 struct Controller gControllers[MAXCONTROLLERS];
 OSContStatus gControllerStatuses[MAXCONTROLLERS];
@@ -837,22 +840,49 @@ void thread5_game_loop(UNUSED void *arg) {
     }
 }
 
+u8 gInstantWarp = 0;
+u8 gInstantWarpReady;
+u32 lastRenderedFrame = 0xFFFFFFFF;
+u8 gLoadReset = 0;
 
 void thread11_graphics(void) {
+    u32 prevTime = 0;
 
     set_vblank_handler(3, &gVideoVblankHandler, &gVideoVblankQueue, (OSMesg) 1);
     render_init();
 
-    while (TRUE) {
+    while (gResetTimer == 0) {
+        u32 deltaTime = osGetCount() - prevTime;
+        prevTime = osGetCount();
+        gLerpSpeed = OS_CYCLES_TO_USEC(deltaTime) / 33333.33f;
+        if (gLoadReset) {
+            gLoadReset = 0;
+            gLerpSpeed = 1.0f;
+        }
+
+        if (deltaTime < OS_USEC_TO_CYCLES(33333)/* || gPlatform & EMULATOR*/) { // > 30 fps
+            if (lastRenderedFrame - gGlobalTimer == 1) {
+                gMoveSpeed = 0; // Full
+            } else {
+                gMoveSpeed = 1; // Half
+            }
+        } else if (deltaTime > OS_USEC_TO_CYCLES(66666)) { // < 15fps
+            if (gGlobalTimer - lastRenderedFrame == 1) {
+                gMoveSpeed = 2; // Full and a half
+            } else {
+                gMoveSpeed = 0; // Full
+            }
+        } else {
+            gMoveSpeed = 0;
+        }
+        lastRenderedFrame = gGlobalTimer;
+
         u32 first = osGetTime();
-        //profiler_log_thread9_time(THREAD9_START);
         select_gfx_pool();
         init_rcp(CLEAR_ZBUFFER);
         render_game();
         end_master_display_list();
         alloc_display_list(0);
-        //gVideoTime = osGetTime() - first;
-        //rofiler_log_thread9_time(THREAD9_END);
 
         display_and_vsync();
         osRecvMesg(&gVideoVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);

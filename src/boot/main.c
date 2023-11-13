@@ -121,6 +121,7 @@ void alloc_pool(void) {
 #ifdef PUPPYLIGHTS
     gLightsPool = mem_pool_init(PUPPYLIGHTS_POOL, MEMORY_POOL_LEFT);
 #endif
+    gAnimationsMemoryPool = mem_pool_init(0x4000, MEMORY_POOL_LEFT);
 }
 
 void create_thread(OSThread *thread, OSId id, void (*entry)(void *), void *arg, void *sp, OSPri pri) {

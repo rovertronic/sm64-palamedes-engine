@@ -1075,7 +1075,6 @@ s16 approach_s16_asymptotic(s16 current, s16 target, s16 divisor) {
     }
     return current;
 }
-
 s16 abs_angle_diff(s16 a0, s16 a1) {
     register s16 diff = (a1 - a0);
     if (diff == -0x8000) return 0x7FFF;

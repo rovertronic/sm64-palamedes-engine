@@ -23,6 +23,10 @@
 #include "config/config_world.h"
 #include "quasilight.h"
 
+#include "lerp.h"
+#include "level_update.h"
+#include "memory.h"
+
 /**
  * This file contains the code that processes the scene graph for rendering.
  * The scene graph is responsible for drawing everything except the HUD / text boxes.
@@ -639,6 +643,21 @@ void geo_process_switch(struct GraphNodeSwitchCase *node) {
     }
 }
 
+
+void interpolate_node(struct Object *node) {
+    for (u32  i = 0; i < 3; i++) {
+        if (gMoveSpeed == 1)
+            node->header.gfx.posLerp[i] = approach_pos_lerp(node->header.gfx.posLerp[i], node->header.gfx.pos[i]);
+        else
+            node->header.gfx.posLerp[i] = node->header.gfx.pos[i] + ((f32 *) &node->oVelX)[i];
+        node->header.gfx.scaleLerp[i] = approach_pos_lerp(node->header.gfx.scaleLerp[i], node->header.gfx.scale[i]);
+        node->header.gfx.angleLerp[i] = approach_angle_lerp(node->header.gfx.angleLerp[i], node->header.gfx.angle[i]);
+    }
+}
+
+void geo_process_object(struct Object *node);
+u8 sSkipObject = 0;
+
 Mat4 gCameraTransform;
 
 Lights1 defaultLight = gdSPDefLights1(
@@ -696,7 +715,33 @@ void geo_process_camera(struct GraphNodeCamera *node) {
 
     gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(rollMtx), G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
 
-    mtxf_lookat(gCameraTransform, node->pos, node->focus, node->roll);
+    if (!gMoveSpeed) {
+        node->posLerp[0] = node->pos[0];
+        node->posLerp[1] = node->pos[1];
+        node->posLerp[2] = node->pos[2];
+        node->focusLerp[0] = node->focus[0];
+        node->focusLerp[1] = node->focus[1];
+        node->focusLerp[2] = node->focus[2];
+    } else {
+        node->posLerp[0] = approach_pos_lerp(node->posLerp[0], node->pos[0]);
+        node->posLerp[1] = approach_pos_lerp(node->posLerp[1], node->pos[1]);
+        node->posLerp[2] = approach_pos_lerp(node->posLerp[2], node->pos[2]);
+        node->focusLerp[0] = approach_pos_lerp(node->focusLerp[0], node->focus[0]);
+        node->focusLerp[1] = approach_pos_lerp(node->focusLerp[1], node->focus[1]);
+        node->focusLerp[2] = approach_pos_lerp(node->focusLerp[2], node->focus[2]);
+    }
+
+    mtxf_lookat(gCameraTransform, node->posLerp, node->focusLerp, node->roll);
+
+    if (gMarioState->marioObj) {
+        sSkipObject = TRUE;
+        geo_process_object(gMarioState->marioObj);
+        if (gMarioState->marioObj->platform) {
+            geo_process_object(gMarioState->marioObj->platform);
+        }
+        sSkipObject = FALSE;
+    }
+
 
     // Calculate the lookAt
 #ifdef F3DEX_GBI_2
@@ -990,8 +1035,8 @@ void geo_process_shadow(struct GraphNodeShadow *node) {
             vec3f_copy(shadowPos, gMatStack[gMatStackIndex][3]);
             shadowScale = node->shadowScale * gCurGraphNodeHeldObject->objNode->header.gfx.scale[0];
         } else {
-            vec3f_copy(shadowPos, gCurGraphNodeObject->pos);
-            shadowScale = node->shadowScale * gCurGraphNodeObject->scale[0];
+            vec3f_copy(shadowPos, gCurGraphNodeObject->posLerp);
+            shadowScale = node->shadowScale * gCurGraphNodeObject->scaleLerp[0];
         }
 
         s8 shifted = (gCurrAnimEnabled
@@ -1163,6 +1208,17 @@ void visualise_object_hitbox(struct Object *node) {
  * Process an object node.
  */
 void geo_process_object(struct Object *node) {
+
+    if (sSkipObject) {
+        return;
+    }
+
+    if (gMoveSpeed && node->header.gfx.bothMats >= 2) {
+        interpolate_node(node);
+    } else {
+        warp_node(node);
+    }
+
     if (node->header.gfx.areaIndex == gCurGraphNodeRoot->areaIndex) {
         s32 isInvisible = (node->header.gfx.node.flags & GRAPH_RENDER_INVISIBLE);
         s32 noThrowMatrix = (node->header.gfx.throwMatrix == NULL);
@@ -1171,17 +1227,17 @@ void geo_process_object(struct Object *node) {
         // to update billboarding, scale, rotation, etc. 
         // This still updates translation since it is needed for sound.
         if (isInvisible && noThrowMatrix) {
-            mtxf_translate(gMatStack[gMatStackIndex + 1], node->header.gfx.pos);
+            mtxf_translate(gMatStack[gMatStackIndex + 1], node->header.gfx.posLerp);
         }
         else{
             if (!noThrowMatrix) {
-                mtxf_scale_vec3f(gMatStack[gMatStackIndex + 1], *node->header.gfx.throwMatrix, node->header.gfx.scale);
+                mtxf_scale_vec3f(gMatStack[gMatStackIndex + 1], *node->header.gfx.throwMatrix, node->header.gfx.scaleLerp);
             } else if (node->header.gfx.node.flags & GRAPH_RENDER_BILLBOARD) {
                 mtxf_billboard(gMatStack[gMatStackIndex + 1], gMatStack[gMatStackIndex],
-                            node->header.gfx.pos, node->header.gfx.scale, gCurGraphNodeCamera->roll);
+                            node->header.gfx.posLerp, node->header.gfx.scaleLerp, gCurGraphNodeCamera->roll);
             } else {
-                mtxf_rotate_zxy_and_translate(gMatStack[gMatStackIndex + 1], node->header.gfx.pos, node->header.gfx.angle);
-                mtxf_scale_vec3f(gMatStack[gMatStackIndex + 1], gMatStack[gMatStackIndex + 1], node->header.gfx.scale);
+                mtxf_rotate_zxy_and_translate(gMatStack[gMatStackIndex + 1], node->header.gfx.posLerp, node->header.gfx.angleLerp);
+                mtxf_scale_vec3f(gMatStack[gMatStackIndex + 1], gMatStack[gMatStackIndex + 1], node->header.gfx.scaleLerp);
             }
         }
 

@@ -58,6 +58,7 @@ extern struct MainPoolBlock *sPoolListHeadR;
  * Used for colored text, paintings, and environmental snow and bubbles.
  */
 struct MemoryPool *gEffectsMemoryPool;
+struct MemoryPool *gAnimationsMemoryPool;
 
 
 uintptr_t sSegmentTable[32];
