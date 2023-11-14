@@ -22,6 +22,7 @@ static struct ObjectHitbox sAmpHitbox = {
  * Homing amp initialization function.
  */
 void bhv_homing_amp_init(void) {
+
     vec3f_copy(&o->oHomeVec, &o->oPosVec);
     o->oGravity = 0.0f;
     o->oFriction = 1.0f;
@@ -224,6 +225,9 @@ void bhv_homing_amp_loop(void) {
  * Circling amp initialization function.
  */
 void bhv_circling_amp_init(void) {
+    color_u8 lightcolor = {255,255,0};
+    o->pl = qsl_create_pl(&o->oPosVec,lightcolor,20.0f);
+
     vec3f_copy(&o->oHomeVec, &o->oPosVec);
     o->oAnimState = 1;
 

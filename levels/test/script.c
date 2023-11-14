@@ -35,11 +35,15 @@ const LevelScript level_test_entry[] = {
 	/* Fast64 end persistent block [level commands] */
 
 	AREA(1, test_area_1),
+		OBJECT(MODEL_AMP, -1168, -2451, 5046, 0, 0, 0, 0x00000000, bhvCirclingAmp),
+		OBJECT(MODEL_AMP, 713, -2331, 3760, 0, 0, 0, 0x00000000, bhvCirclingAmp),
+		OBJECT(MODEL_AMP, 628, -2446, 2825, 0, 0, 0, 0x00000000, bhvCirclingAmp),
+		OBJECT(MODEL_NONE, 5198, -3626, 1813, 0, 0, 0, 0x00000000, bhvStaticObject),
 		MARIO_POS(0x01, 0, 0, -140, 0),
-		OBJECT(MODEL_STAR, 0, 0, 0, 0, 0, 0, 0x00000000, bhvStaticObject),
+		OBJECT(MODEL_STAR, 3341, 2205, -6803, 0, 0, 0, 0x00000000, bhvStar),
 		TERRAIN(test_area_1_collision),
 		MACRO_OBJECTS(test_area_1_macro_objs),
-		STOP_MUSIC(0),
+		SET_BACKGROUND_MUSIC(0x00, SEQ_LEVEL_SNOW),
 		TERRAIN_TYPE(TERRAIN_GRASS),
 		/* Fast64 begin persistent block [area commands] */
 		/* Fast64 end persistent block [area commands] */

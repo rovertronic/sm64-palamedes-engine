@@ -25,6 +25,9 @@ and have a vertex wiggle animation.
 float_vertex qsl_vertex_pool[10000];
 int qsl_vertex_index = 0;
 
+point_light qsl_point_light_pool[20];
+int qsl_point_light_count = 0;
+
 dl_to_iterate qsl_dl_pool[10];
 dl_to_iterate * curr_qsl_dl;
 int qsl_dl_count = 0;
@@ -33,8 +36,6 @@ u8 qsl_dl_flagged = FALSE;
 Vec3f qsl_global_sun_direction = {0.0f, 1.0f, 0.0f};
 color_u8 qsl_global_sun_color = {60,60,60};//{90/2, 95/2, 100/2};
 color_u8 qsl_global_ambient_color = {60,60,60};//{50/2, 45/2, 50/2};
-
-Vec3f qsl_pl_source = {0.0f, 0.0f, 0.0f};
 
 vector_s8 vec3f_to_vector_s8(Vec3f vector) {
     vector_s8 returnvec;
@@ -45,30 +46,61 @@ vector_s8 vec3f_to_vector_s8(Vec3f vector) {
     return returnvec;
 }
 
-vector_s8 qsl_pl_direction(Vec3f position) {
-    Vec3f source = {0.0f, 0.0f, 0.0f};
-    vec3f_copy(source,qsl_pl_source);
+point_light * qsl_create_pl(Vec3f position, color_u8 color, f32 brightness) {
+    vec3f_copy(qsl_point_light_pool[qsl_point_light_count].position,position);
+    qsl_point_light_pool[qsl_point_light_count].color = color;
+    qsl_point_light_pool[qsl_point_light_count].brightness = brightness;
+    qsl_point_light_pool[qsl_point_light_count].id = qsl_point_light_count;
+    qsl_point_light_count++;
+    return &qsl_point_light_pool[qsl_point_light_count-1];
+}
 
+void qsl_remove_pl(int id) {
+    qsl_point_light_count--;
+
+    for (int i=id; i<qsl_point_light_count+1; i++) {
+        bcopy(&qsl_point_light_pool[i+1],&qsl_point_light_pool[i],sizeof(qsl_point_light_pool[0]));
+        //qsl_point_light_pool[i].id = id;
+    }
+}
+
+point_light * qsl_pl_nearest(Vec3f position) {
+    f32 smallest_dist = 9999.0f;
+    point_light * nearest_pl = NULL;
+
+    for(int i=0; i<qsl_point_light_count; i++) {
+        Vec3f transformed_light;
+        vec3f_diff(transformed_light, qsl_point_light_pool[i].position ,position);
+
+        f32 dist = vec3_mag(transformed_light);
+
+        if (dist < smallest_dist) {
+            smallest_dist = dist;
+            nearest_pl = &qsl_point_light_pool[i];
+        }
+    }
+
+    return nearest_pl;
+}
+
+vector_s8 qsl_pl_direction(Vec3f position, point_light * pl) {
     Vec3f light_direction;
-    vec3f_diff(light_direction,source,position);
+    vec3f_diff(light_direction,pl->position,position);
     vec3f_normalize(light_direction);
 
     return vec3f_to_vector_s8(light_direction);
 }
 
-color_u8 qsl_pl_color(Vec3f position) {
-    Vec3f source = {0.0f, 0.0f, 0.0f};
-    vec3f_copy(source,qsl_pl_source);
-
+color_u8 qsl_pl_color(Vec3f position, point_light * pl) {
     Vec3f transformed_light;
-    vec3f_diff(transformed_light,source,position);
+    vec3f_diff(transformed_light,pl->position,position);
 
     f32 dist = vec3_mag(transformed_light);
-    f32 brightness = 8.0f;
+    f32 brightness = pl->brightness;
     color_u8 light_here;
-    light_here.r = CLAMP_0(255 - (dist/brightness));
-    light_here.g = CLAMP_0(255 - (dist/brightness));
-    light_here.b = CLAMP_0(255 - (dist/brightness))*0;
+    light_here.r = CLAMP_0(255 - (dist/brightness))*(pl->color.r/255.0f);
+    light_here.g = CLAMP_0(255 - (dist/brightness))*(pl->color.g/255.0f);
+    light_here.b = CLAMP_0(255 - (dist/brightness))*(pl->color.b/255.0f);
     return light_here;
 }
 
@@ -90,23 +122,30 @@ vector_s8 qsl_sun_direction(Vec3f position) {
     return vec3f_to_vector_s8(qsl_global_sun_direction);
 }
 
-color_u8 qsl_color_env(Vec3f position, Vec3f point_normal) {
+color_u8 qsl_plane_color(Vec3f position) {
+    f32 base_y = -3626.0f;
+    f32 light_level = CLAMP_255(CLAMP_0(255.0f-(position[1]-base_y)/4.0f));
+
+    color_u8 plane_color;
+    plane_color.r = 0;
+    plane_color.g = light_level;
+    plane_color.b = 0;
+    return plane_color;
+}
+
+color_u8 qsl_color_env(Vec3f position, Vec3f point_normal, point_light * pl) {
     f32 sun_coverage = (1.0f + vec3f_dot(point_normal,qsl_global_sun_direction))/2.0f;
     color_u8 sun_color = qsl_sun_color(position);
 
     color_u8 ambient = qsl_ambient_color(position);
 
-    Vec3f source;
-    f32 brightness = 8.0f;
-    color_u8 point_col = qsl_pl_color(position);
-    vec3f_copy(source,qsl_pl_source);
+    f32 brightness = pl->brightness;
+    color_u8 point_col = pl->color;
     Vec3f transformed_light;
-    vec3f_diff(transformed_light,source,position);
+    vec3f_diff(transformed_light, pl->position, position);
     f32 dist = vec3_mag(transformed_light);
-    Vec3f light_direction;
-    vec3f_diff(light_direction,source,position);
-    vec3f_normalize(light_direction);
-    f32 surf_coverage = (1.0f + vec3f_dot(point_normal,light_direction))/2.0f;
+    vec3f_normalize(transformed_light);
+    f32 surf_coverage = (1.0f + vec3f_dot(point_normal,transformed_light))/2.0f;
 
     color_u8 light_here;
     light_here.r = CLAMP_255(ambient.r + (sun_coverage*sun_color.r) + CLAMP_0(255 - (dist/brightness))*surf_coverage*(point_col.r/127.0f) );
@@ -132,8 +171,11 @@ void qsl_init_vtx_list(Vtx * terrain, int size) {
 };
 
 void qsl_update_vtx_list_light(Vtx * terrain, int size) {
+    if (qsl_point_light_count==0) {return;}
+
     for (int i = 0; i < size; i++) {
-        color_u8 color = qsl_color_env(qsl_vertex_pool[qsl_vertex_index].position, qsl_vertex_pool[qsl_vertex_index].normal);
+        point_light * pl = qsl_pl_nearest(qsl_vertex_pool[qsl_vertex_index].position);
+        color_u8 color = qsl_color_env(qsl_vertex_pool[qsl_vertex_index].position, qsl_vertex_pool[qsl_vertex_index].normal, pl);
         terrain[i].v.cn[0] = color.r;
         terrain[i].v.cn[1] = color.g;
         terrain[i].v.cn[2] = color.b;
@@ -174,6 +216,14 @@ void qsl_update_vertex_iterator_thread10(void) {
     u32 * qsl_gfx_stack[40];
 
     set_vblank_handler(4, &gQuasilightVblankHandler, &gQuasilightVblankQueue, (OSMesg) 1);
+
+    Vec3f zeroo = {0,0,0};
+    color_u8 col = {255,255,255};
+    qsl_create_pl(zeroo,col,4.0f);
+
+    Vec3f plac = {700,0,0};
+    color_u8 col2 = {255,0,0};
+    qsl_create_pl(plac,col2,4.0f);
 
     while (TRUE) {
 
@@ -265,19 +315,22 @@ All these functions apply to whatever model / object you put them on.
 /* Put this on any object in which you'd like it to recieve point lights and sunlight.*/
 Gfx *geo_object_calculate_light(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
     if (callContext == GEO_CONTEXT_RENDER) {
+        if (qsl_point_light_count==0) {return NULL;}
+
         Vec3f object_pos = {(*mtx)[3][0], (*mtx)[3][1], (*mtx)[3][2]};
-        //struct Object *obj = (struct Object *) node;
-        //Vec3f object_pos = {obj->oPosX, obj->oPosY, obj->oPosZ};
 
-        Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*6);
-        Lights2 *dir_light = alloc_display_list(sizeof(*dir_light));
+        Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*8);
+        Lights3 *dir_light = alloc_display_list(sizeof(*dir_light));
 
-        vector_s8 point_dir = qsl_pl_direction(object_pos);
-        color_u8 point_col = qsl_pl_color(object_pos);
+        point_light * pl = qsl_pl_nearest(object_pos);
+        vector_s8 point_dir = qsl_pl_direction(object_pos, pl);
+        color_u8 point_col = qsl_pl_color(object_pos, pl);
 
         color_u8 amb = qsl_ambient_color(object_pos);
         vector_s8 sun_dir = qsl_sun_direction(object_pos);
         color_u8 sun_col = qsl_sun_color(object_pos);
+
+        color_u8 plane_col = qsl_plane_color(object_pos);
 
         dir_light->a.l.col[0] =  amb.r;
         dir_light->a.l.col[1] =  amb.g;
@@ -306,13 +359,24 @@ Gfx *geo_object_calculate_light(s32 callContext, struct GraphNode *node, Mat4 *m
         dir_light->l[1].l.colc[1] = sun_col.g;
         dir_light->l[1].l.colc[2] = sun_col.b;
 
+        dir_light->l[2].l.dir[0]  = 0;
+        dir_light->l[2].l.dir[1]  = -127;
+        dir_light->l[2].l.dir[2]  = 0;
+        dir_light->l[2].l.col[0]  = plane_col.r;
+        dir_light->l[2].l.col[1]  = plane_col.g;
+        dir_light->l[2].l.col[2]  = plane_col.b;
+        dir_light->l[2].l.colc[0] = plane_col.r;
+        dir_light->l[2].l.colc[1] = plane_col.g;
+        dir_light->l[2].l.colc[2] = plane_col.b;
+
 
         gSPSetGeometryMode(&gfxlist[0], G_LIGHTING);
-        gSPNumLights(&gfxlist[1],NUMLIGHTS_2);
+        gSPNumLights(&gfxlist[1],NUMLIGHTS_3);
         gSPLight(&gfxlist[2],&(*dir_light).l[0],1);	
         gSPLight(&gfxlist[3],&(*dir_light).l[1],2);
-        gSPLight(&gfxlist[4],&(*dir_light).a,3);
-        gSPEndDisplayList(&gfxlist[5]);
+        gSPLight(&gfxlist[4],&(*dir_light).l[2],3);
+        gSPLight(&gfxlist[5],&(*dir_light).a,4);
+        gSPEndDisplayList(&gfxlist[6]);
 
         geo_append_display_list(gfxlist, LAYER_OPAQUE);
         geo_append_display_list(gfxlist, LAYER_ALPHA);
@@ -353,8 +417,8 @@ Gfx *geo_terrain_use_global_light(s32 callContext, struct GraphNode *node, Mat4 
         gSPSetGeometryMode(&gfxlist[0], G_LIGHTING);
         gSPNumLights(&gfxlist[1],NUMLIGHTS_1);
         gSPLight(&gfxlist[2],&(*dir_light).l[0],1);	
-        gSPLight(&gfxlist[4],&(*dir_light).a,2);
-        gSPEndDisplayList(&gfxlist[5]);
+        gSPLight(&gfxlist[3],&(*dir_light).a,2);
+        gSPEndDisplayList(&gfxlist[4]);
 
         geo_append_display_list(gfxlist, LAYER_OPAQUE);
         geo_append_display_list(gfxlist, LAYER_ALPHA);

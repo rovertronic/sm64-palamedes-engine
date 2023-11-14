@@ -42,6 +42,10 @@ void obj_update_gfx_pos_and_angle(struct Object *obj) {
     obj->header.gfx.angle[0] = (obj->oFaceAnglePitch & 0xFFFF);
     obj->header.gfx.angle[1] = (obj->oFaceAngleYaw   & 0xFFFF);
     obj->header.gfx.angle[2] = (obj->oFaceAngleRoll  & 0xFFFF);
+
+    if (obj->pl) {
+        vec3f_copy(obj->pl->position, &obj->oPosVec);
+    }
 }
 
 #ifdef OBJ_OPACITY_BY_CAM_DIST

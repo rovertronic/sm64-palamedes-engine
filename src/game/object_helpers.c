@@ -886,6 +886,11 @@ void obj_mark_for_deletion(struct Object *obj) {
     //  object is marked for deletion, it still updates on that frame (I think),
     //  so this is worth looking into.
     //! NOTE: Changing this can cause reference issues!
+    if (obj->pl) {
+        qsl_remove_pl(obj->pl->id);
+        obj->pl = NULL;
+    }
+
     obj->activeFlags = ACTIVE_FLAG_DEACTIVATED;
 }
 

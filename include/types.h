@@ -288,6 +288,8 @@ struct PuppyLight {
 #define MAX_OBJECT_FIELDS 0x50
 #endif
 
+#include "src/game/quasilight.h"
+
 struct Object {
     /*0x000*/ struct ObjectNode header;
     /*0x068*/ struct Object *parentObj;
@@ -345,6 +347,7 @@ struct Object {
     /*0x218*/ void *collisionData;
     /*0x21C*/ Mat4 transform;
     /*0x25C*/ void *respawnInfo;
+              point_light * pl;
 #ifdef PUPPYLIGHTS
     struct PuppyLight puppylight;
 #endif

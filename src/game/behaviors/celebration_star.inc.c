@@ -1,6 +1,9 @@
 // celebration_star.inc.c
 
 void bhv_celebration_star_init(void) {
+    color_u8 lightcolor = {255,255,0};
+    o->pl = qsl_create_pl(&o->oPosVec,lightcolor,6.0f);
+
     o->oHomeX = gMarioObject->header.gfx.pos[0];
     o->oPosY = gMarioObject->header.gfx.pos[1] + 30.0f;
     o->oHomeZ = gMarioObject->header.gfx.pos[2];
