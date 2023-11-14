@@ -65,6 +65,7 @@ struct Config gConfig;
 struct VblankHandler *gVblankHandler1       = NULL;
 struct VblankHandler *gVblankHandler2       = NULL;
 struct VblankHandler *gVblankHandler3       = NULL;
+struct VblankHandler *gVblankHandler4       = NULL;
 struct SPTask        *gActiveSPTask         = NULL;
 struct SPTask        *sCurrentAudioSPTask   = NULL;
 struct SPTask        *sCurrentDisplaySPTask = NULL;
@@ -245,6 +246,7 @@ void handle_vblank(void) {
     if (gVblankHandler1 != NULL) osSendMesg(gVblankHandler1->queue, gVblankHandler1->msg, OS_MESG_NOBLOCK);
     if (gVblankHandler2 != NULL) osSendMesg(gVblankHandler2->queue, gVblankHandler2->msg, OS_MESG_NOBLOCK);
     if (gVblankHandler3 != NULL) osSendMesg(gVblankHandler3->queue, gVblankHandler3->msg, OS_MESG_NOBLOCK);
+    if (gVblankHandler4 != NULL) osSendMesg(gVblankHandler4->queue, gVblankHandler4->msg, OS_MESG_NOBLOCK);
 }
 
 void handle_sp_complete(void) {
@@ -350,11 +352,6 @@ void check_stack_validity(void) {
 }
 #endif
 
-void create_thread_10_quasilight(void) {
-    create_thread(&gQuasilightThread, THREAD_10_QUASILIGHT, qsl_update_terrain_lighting_thread10, NULL, gThread10Stack + THREAD10_STACK, 1);
-    osStartThread(&gQuasilightThread);
-}
-
 
 extern void crash_screen_init(void);
 extern OSViMode VI;
@@ -413,6 +410,8 @@ void thread3_main(UNUSED void *arg) {
     create_thread(&gGameLoopThread, THREAD_5_GAME_LOOP, thread5_game_loop, NULL, gThread5Stack + THREAD5_STACK, 10);
     osStartThread(&gGameLoopThread);
 
+    create_thread(&gQuasilightThread, THREAD_10_QUASILIGHT, qsl_update_vertex_iterator_thread10, NULL, gThread10Stack + THREAD10_STACK, 1);
+
     create_thread(&gVideoLoopThread, THREAD_11_GRAPHICS, thread11_graphics, NULL, gThread11Stack + 0x2000, 2);
 
     while (TRUE) {
@@ -460,6 +459,10 @@ void set_vblank_handler(s32 index, struct VblankHandler *handler, OSMesgQueue *q
         case 3:
             gVblankHandler3 = handler;
             break;
+        case 4:
+            gVblankHandler4 = handler;
+            break;
+        break;
     }
 }
 

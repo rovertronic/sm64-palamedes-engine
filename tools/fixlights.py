@@ -95,8 +95,8 @@ for file in lightFiles:
                 index += 1
                 continue
 
-            if curLine.startswith("gsSPSetGeometryMode(G_LIGHTING),"):
-                fileLines[index] = "gsSPClearGeometryMode(G_LIGHTING),"
+            #if curLine.startswith("gsSPSetGeometryMode(G_LIGHTING),"):
+            #    fileLines[index] = "gsSPClearGeometryMode(G_LIGHTING),"
 
             if curLine.startswith("gsSPSetLights1("):
                 structName = curLine.split("(")[1].split(")")[0] # Get string between ( and )

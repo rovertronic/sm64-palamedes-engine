@@ -8,6 +8,7 @@
 #include "game/moving_texture.h"
 #include "game/screen_transition.h"
 #include "game/paintings.h"
+#include "game/quasilight.h"
 
 #include "make_const_nonconst.h"
 

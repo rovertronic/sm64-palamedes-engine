@@ -61,14 +61,17 @@ s8 gSramProbe;
 #endif
 OSMesgQueue gGameVblankQueue;
 OSMesgQueue gVideoVblankQueue;
+OSMesgQueue gQuasilightVblankQueue;
 OSMesgQueue gGfxVblankQueue;
 OSMesg gGameMesgBuf[1];
 OSMesg gVideoMesgBuf[1];
 OSMesg gGfxMesgBuf[1];
+OSMesg gQuasilightMesgBuf[1];
 
 // Vblank Handler
 struct VblankHandler gGameVblankHandler;
 struct VblankHandler gVideoVblankHandler;
+struct VblankHandler gQuasilightVblankHandler;
 
 // Buffers
 uintptr_t gPhysicalFramebuffers[3];
@@ -727,6 +730,7 @@ void setup_game_memory(void) {
     osCreateMesgQueue(&gGfxVblankQueue, gGfxMesgBuf, ARRAY_COUNT(gGfxMesgBuf));
     osCreateMesgQueue(&gGameVblankQueue, gGameMesgBuf, ARRAY_COUNT(gGameMesgBuf));
     osCreateMesgQueue(&gVideoVblankQueue, gVideoMesgBuf, ARRAY_COUNT(gVideoMesgBuf));
+    osCreateMesgQueue(&gQuasilightVblankQueue, gQuasilightMesgBuf, ARRAY_COUNT(gQuasilightMesgBuf));
     // Setup z buffer and framebuffer
     gPhysicalZBuffer = VIRTUAL_TO_PHYSICAL(gZBuffer);
     gPhysicalFramebuffers[0] = VIRTUAL_TO_PHYSICAL(gFramebuffer0);

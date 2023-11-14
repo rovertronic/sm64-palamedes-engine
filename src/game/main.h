@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include "config.h"
+#include "types.h"
 
 enum VIModes {
     MODE_NTSC,
@@ -65,6 +66,7 @@ extern OSThread gRumblePakThread;
 extern OSPfs gRumblePakPfs;
 #endif
 extern OSThread gVideoLoopThread;
+extern OSThread gQuasilightThread;
 
 extern OSMesgQueue gPIMesgQueue;
 extern OSMesgQueue gIntrMesgQueue;

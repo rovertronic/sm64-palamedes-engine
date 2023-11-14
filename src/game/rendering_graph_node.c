@@ -670,8 +670,6 @@ Lights2 templight = gdSPDefLights2(
         80, 80, 80, 0, 127, 0
 );
 
-u8 nomore = FALSE;
-
 void setup_global_light() {
     //Lights1* curLight = (Lights1*)alloc_display_list(sizeof(Lights1));
     //bcopy(&defaultLight, curLight, sizeof(Lights1));
@@ -689,14 +687,6 @@ void setup_global_light() {
 #endif
 
     //qsl_update_terrain_lighting();
-
-    if (nomore == FALSE) {
-        
-    if (gMarioState->controller->buttonPressed & L_TRIG) {
-        create_thread_10_quasilight();
-        nomore = TRUE;
-    }
-    }
 
     gSPSetLights1(gDisplayListHead++, defaultLight);
 }

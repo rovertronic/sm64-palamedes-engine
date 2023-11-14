@@ -463,6 +463,7 @@ struct GraphNodeGenerated *init_graph_node_generated(struct AllocOnlyPool *pool,
         init_scene_graph_node_links(&graphNode->fnNode.node, GRAPH_NODE_TYPE_GENERATED_LIST);
         graphNode->fnNode.func = gfxFunc;
         graphNode->parameter = parameter;
+        graphNode->qflags = 0;
 
         if (gfxFunc != NULL) {
             gfxFunc(GEO_CONTEXT_CREATE, &graphNode->fnNode.node, pool);

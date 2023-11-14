@@ -1,18 +1,22 @@
+#include "main.h"
 #include "engine/math_util.h"
 #include "game_init.h"
 #include "quasilight.h"
 #include "memory.h"
 #include "level_update.h"
 #include "area.h"
+#include "camera.h"
 
 #include "levels/test/header.h"
 
 /*
 QUASILIGHT.C 
-Quasilight is a lighting engine for Super Mario 64.
+Quasilight is a vertex-iteration system & lighting engine for Super Mario 64.
 The core concept is that objects use directional lights to simulate lighting while
 the environment uses vertex colors to simulate terrain lighting. Multi-threading is used
-to ensure that environment lighting does not lag general gameplay.
+to ensure that vertex-iteration does not lag general gameplay. You plug in a display list
+and you can apply lighting, have it become transparent when between mario and the camera,
+and have a vertex wiggle animation.
 */
 
 #define CLAMP_0(x) ((x < 0) ? 0 : x)
@@ -21,9 +25,14 @@ to ensure that environment lighting does not lag general gameplay.
 float_vertex qsl_vertex_pool[10000];
 int qsl_vertex_index = 0;
 
+dl_to_iterate qsl_dl_pool[10];
+dl_to_iterate * curr_qsl_dl;
+int qsl_dl_count = 0;
+u8 qsl_dl_flagged = FALSE;
+
 Vec3f qsl_global_sun_direction = {0.0f, 1.0f, 0.0f};
-color_u8 qsl_global_sun_color = {0,0,0};//{90/2, 95/2, 100/2};
-color_u8 qsl_global_ambient_color = {0,0,0};//{50/2, 45/2, 50/2};
+color_u8 qsl_global_sun_color = {60,60,60};//{90/2, 95/2, 100/2};
+color_u8 qsl_global_ambient_color = {60,60,60};//{50/2, 45/2, 50/2};
 
 Vec3f qsl_pl_source = {0.0f, 0.0f, 0.0f};
 
@@ -122,26 +131,98 @@ void qsl_init_vtx_list(Vtx * terrain, int size) {
     }
 };
 
-void qsl_update_vtx_list(Vtx * terrain, int size) {
+void qsl_update_vtx_list_light(Vtx * terrain, int size) {
     for (int i = 0; i < size; i++) {
         color_u8 color = qsl_color_env(qsl_vertex_pool[qsl_vertex_index].position, qsl_vertex_pool[qsl_vertex_index].normal);
         terrain[i].v.cn[0] = color.r;
         terrain[i].v.cn[1] = color.g;
         terrain[i].v.cn[2] = color.b;
+        qsl_vertex_index++;
+    }
+}
+
+void qsl_update_vtx_list_wiggle(Vtx * terrain, int size) {
+    for (int i = 0; i < size; i++) {
+        s16 x = terrain[i].v.ob[0];
+        s16 z = terrain[i].v.ob[2];
+
+        terrain[i].v.ob[1] = qsl_vertex_pool[qsl_vertex_index].position[1] + sins((x + z + gGlobalTimer)*0x400) * 30.0f;
 
         qsl_vertex_index++;
     }
 }
 
-u32 * qsl_gfx_stack[40];
+void qsl_update_vtx_list_camera_alpha(Vtx * terrain, int size) {
+    for (int i = 0; i < size; i++) {
+        Vec3f vert_to_mario;
+        vec3f_diff(vert_to_mario,gMarioState->pos,qsl_vertex_pool[qsl_vertex_index].position);
+        vec3f_normalize(vert_to_mario);
+        f32 dot1 = vec3f_dot(qsl_vertex_pool[qsl_vertex_index].normal, vert_to_mario);
 
-void qsl_update_terrain_lighting_thread10(void) {
-    //qsl_init_terrain_lighting();
+        if (dot1 > 0) {
+            qsl_dl_flagged = TRUE;
+        }
+        qsl_vertex_index++;
+    }
+}
 
-    u32 * command_read = segmented_to_virtual(test_dl_bob_mesh_layer_1);
+void qsl_update_vertex_iterator_thread10(void) {
+    u32 * command_read = segmented_to_virtual(mat_test_dl_f3dlite_material);
     int qsl_gfx_stack_level = 0;
     u8 end_of_list = FALSE;
     qsl_vertex_index = 0;
+    u32 * qsl_gfx_stack[40];
+
+    set_vblank_handler(4, &gQuasilightVblankHandler, &gQuasilightVblankQueue, (OSMesg) 1);
+
+    while (TRUE) {
+
+        qsl_vertex_index = 0;
+        for (int i = 0; i<qsl_dl_count; i++) {
+            qsl_dl_flagged = FALSE;
+            curr_qsl_dl = &qsl_dl_pool[i];
+
+            command_read = segmented_to_virtual(qsl_dl_pool[i].dl);
+            end_of_list = FALSE;
+            qsl_gfx_stack_level = 0;
+
+            while(!end_of_list) {
+                if  ( ((*command_read)>>24) == G_DL)  {
+                    qsl_gfx_stack[qsl_gfx_stack_level] = command_read+2;
+                    qsl_gfx_stack_level++;
+
+                    command_read = segmented_to_virtual(*(command_read+1));
+                }
+                if ( ((*command_read)>>24) == G_VTX) {
+                    int size = (((*command_read)>>12) & 0xFF);
+                    qsl_dl_pool[i].func( segmented_to_virtual(*(command_read+1)), size);
+
+                }
+                if ( ((*command_read)>>24) == G_ENDDL) {
+                    if (qsl_gfx_stack_level == 0) {
+                        end_of_list = TRUE;
+                    } else {
+                        qsl_gfx_stack_level--;
+                        command_read = qsl_gfx_stack[qsl_gfx_stack_level];
+                    }
+                } else {
+                    command_read+=2;
+                }
+            }
+
+            struct GraphNodeGenerated * geo_asm = curr_qsl_dl->node;
+            geo_asm->qflags = qsl_dl_flagged;
+        }
+
+        osRecvMesg(&gQuasilightVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
+    }
+}
+
+void qsl_add_dl_to_iterator(Gfx * dl_to_add, void (*func_to_add)(Vtx * terrain, int size), struct GraphNode *node) {
+    u32 * command_read = segmented_to_virtual(dl_to_add);
+    int qsl_gfx_stack_level = 0;
+    u8 end_of_list = FALSE;
+    u32 * qsl_gfx_stack[40];
 
     while(!end_of_list) {
         if  ( ((*command_read)>>24) == G_DL)  {
@@ -166,38 +247,188 @@ void qsl_update_terrain_lighting_thread10(void) {
         }
     }
 
-    while (TRUE) {
+    qsl_dl_pool[qsl_dl_count].dl = dl_to_add;
+    qsl_dl_pool[qsl_dl_count].func = func_to_add;
+    qsl_dl_pool[qsl_dl_count].node = node;
 
-        //if (gMarioState->controller->buttonDown & L_TRIG) {
-            vec3f_copy(qsl_pl_source,gMarioState->pos);
-        //}
+    if (qsl_dl_count == 0) {
+        osStartThread(&gQuasilightThread);
+    }
+    qsl_dl_count++;
+}
 
-        command_read = segmented_to_virtual(test_dl_bob_mesh_layer_1);
-        end_of_list = FALSE;
-        qsl_gfx_stack_level = 0;
-        qsl_vertex_index = 0;
 
-        while(!end_of_list) {
-            if  ( ((*command_read)>>24) == G_DL)  {
-                qsl_gfx_stack[qsl_gfx_stack_level] = command_read+2;
-                qsl_gfx_stack_level++;
+/* GEO ASMs
+All these functions apply to whatever model / object you put them on.
+*/
 
-                command_read = segmented_to_virtual(*(command_read+1));
+/* Put this on any object in which you'd like it to recieve point lights and sunlight.*/
+Gfx *geo_object_calculate_light(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
+    if (callContext == GEO_CONTEXT_RENDER) {
+        Vec3f object_pos = {(*mtx)[3][0], (*mtx)[3][1], (*mtx)[3][2]};
+        //struct Object *obj = (struct Object *) node;
+        //Vec3f object_pos = {obj->oPosX, obj->oPosY, obj->oPosZ};
+
+        Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*6);
+        Lights2 *dir_light = alloc_display_list(sizeof(*dir_light));
+
+        vector_s8 point_dir = qsl_pl_direction(object_pos);
+        color_u8 point_col = qsl_pl_color(object_pos);
+
+        color_u8 amb = qsl_ambient_color(object_pos);
+        vector_s8 sun_dir = qsl_sun_direction(object_pos);
+        color_u8 sun_col = qsl_sun_color(object_pos);
+
+        dir_light->a.l.col[0] =  amb.r;
+        dir_light->a.l.col[1] =  amb.g;
+        dir_light->a.l.col[2] =  amb.b;
+        dir_light->a.l.colc[0] = amb.r;
+        dir_light->a.l.colc[1] = amb.g;
+        dir_light->a.l.colc[2] = amb.b;
+
+        dir_light->l[0].l.dir[0]  = point_dir.x;
+        dir_light->l[0].l.dir[1]  = point_dir.y;
+        dir_light->l[0].l.dir[2]  = point_dir.z;
+        dir_light->l[0].l.col[0]  = point_col.r;
+        dir_light->l[0].l.col[1]  = point_col.g;
+        dir_light->l[0].l.col[2]  = point_col.b;
+        dir_light->l[0].l.colc[0] = point_col.r;
+        dir_light->l[0].l.colc[1] = point_col.g;
+        dir_light->l[0].l.colc[2] = point_col.b;
+
+        dir_light->l[1].l.dir[0]  = sun_dir.x;
+        dir_light->l[1].l.dir[1]  = sun_dir.y;
+        dir_light->l[1].l.dir[2]  = sun_dir.z;
+        dir_light->l[1].l.col[0]  = sun_col.r;
+        dir_light->l[1].l.col[1]  = sun_col.g;
+        dir_light->l[1].l.col[2]  = sun_col.b;
+        dir_light->l[1].l.colc[0] = sun_col.r;
+        dir_light->l[1].l.colc[1] = sun_col.g;
+        dir_light->l[1].l.colc[2] = sun_col.b;
+
+
+        gSPSetGeometryMode(&gfxlist[0], G_LIGHTING);
+        gSPNumLights(&gfxlist[1],NUMLIGHTS_2);
+        gSPLight(&gfxlist[2],&(*dir_light).l[0],1);	
+        gSPLight(&gfxlist[3],&(*dir_light).l[1],2);
+        gSPLight(&gfxlist[4],&(*dir_light).a,3);
+        gSPEndDisplayList(&gfxlist[5]);
+
+        geo_append_display_list(gfxlist, LAYER_OPAQUE);
+        geo_append_display_list(gfxlist, LAYER_ALPHA);
+    }
+
+    return NULL;
+}
+
+Gfx *geo_terrain_use_global_light(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
+    if (callContext == GEO_CONTEXT_RENDER) {
+        Vec3f object_pos = {0.0f,0.0,0.0f};
+
+        Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*6);
+        Lights1 *dir_light = alloc_display_list(sizeof(*dir_light));
+
+        color_u8 amb = qsl_ambient_color(object_pos);
+        vector_s8 sun_dir = qsl_sun_direction(object_pos);
+        color_u8 sun_col = qsl_sun_color(object_pos);
+
+        dir_light->a.l.col[0] =  amb.r;
+        dir_light->a.l.col[1] =  amb.g;
+        dir_light->a.l.col[2] =  amb.b;
+        dir_light->a.l.colc[0] = amb.r;
+        dir_light->a.l.colc[1] = amb.g;
+        dir_light->a.l.colc[2] = amb.b;
+
+        dir_light->l[1].l.dir[0]  = sun_dir.x;
+        dir_light->l[1].l.dir[1]  = sun_dir.y;
+        dir_light->l[1].l.dir[2]  = sun_dir.z;
+        dir_light->l[1].l.col[0]  = sun_col.r;
+        dir_light->l[1].l.col[1]  = sun_col.g;
+        dir_light->l[1].l.col[2]  = sun_col.b;
+        dir_light->l[1].l.colc[0] = sun_col.r;
+        dir_light->l[1].l.colc[1] = sun_col.g;
+        dir_light->l[1].l.colc[2] = sun_col.b;
+
+
+        gSPSetGeometryMode(&gfxlist[0], G_LIGHTING);
+        gSPNumLights(&gfxlist[1],NUMLIGHTS_1);
+        gSPLight(&gfxlist[2],&(*dir_light).l[0],1);	
+        gSPLight(&gfxlist[4],&(*dir_light).a,2);
+        gSPEndDisplayList(&gfxlist[5]);
+
+        geo_append_display_list(gfxlist, LAYER_OPAQUE);
+        geo_append_display_list(gfxlist, LAYER_ALPHA);
+    }
+
+    return NULL;
+}
+
+Gfx *geo_terrain_use_point_light(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
+
+    if (callContext == GEO_CONTEXT_AREA_LOAD) {
+        struct GraphNodeDisplayList * super_next = node->next;
+        qsl_add_dl_to_iterator(super_next->displayList, &qsl_update_vtx_list_light, node);
+    }
+    if (callContext == GEO_CONTEXT_RENDER) {
+        Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*6);
+        gSPClearGeometryMode(&gfxlist[0], G_LIGHTING);
+        gSPEndDisplayList(&gfxlist[1]);
+
+        geo_append_display_list(gfxlist, LAYER_OPAQUE);
+        geo_append_display_list(gfxlist, LAYER_ALPHA);
+    }
+
+    return NULL;
+}
+
+Gfx *geo_terrain_wiggle(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
+
+    if (callContext == GEO_CONTEXT_AREA_LOAD) {
+        struct GraphNodeDisplayList * super_next = node->next;
+        qsl_add_dl_to_iterator(super_next->displayList, &qsl_update_vtx_list_wiggle, node);
+    }
+    if (callContext == GEO_CONTEXT_RENDER) {
+        //Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*6);
+        //gSPClearGeometryMode(&gfxlist[0], G_LIGHTING);
+        //gSPEndDisplayList(&gfxlist[1]);
+
+        //geo_append_display_list(gfxlist, LAYER_OPAQUE);
+        //geo_append_display_list(gfxlist, LAYER_ALPHA);
+    }
+
+    return NULL;
+}
+
+Gfx *geo_terrain_camera_alpha(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
+    struct GraphNodeDisplayList * super_next = node->next;
+
+    if (callContext == GEO_CONTEXT_AREA_LOAD) {
+        qsl_add_dl_to_iterator(super_next->displayList, &qsl_update_vtx_list_camera_alpha, node);
+    }
+    if (callContext == GEO_CONTEXT_RENDER) {
+        struct GraphNodeGenerated * geo_asm = node;
+
+        if (geo_asm->qflags == 1) {
+            if (geo_asm->parameter > 0) {
+                geo_asm->parameter-=2;
             }
-            if ( ((*command_read)>>24) == G_VTX) {
-                int size = (((*command_read)>>12) & 0xFF);
-                qsl_update_vtx_list( segmented_to_virtual(*(command_read+1)), size);
-            }
-            if ( ((*command_read)>>24) == G_ENDDL) {
-                if (qsl_gfx_stack_level == 0) {
-                    end_of_list = TRUE;
-                } else {
-                    qsl_gfx_stack_level--;
-                    command_read = qsl_gfx_stack[qsl_gfx_stack_level];
-                }
-            } else {
-                command_read+=2;
+        } else {
+            if (geo_asm->parameter < 200) {
+                geo_asm->parameter+=2;
             }
         }
+
+        if (geo_asm->parameter == 0) {
+            SET_GRAPH_NODE_LAYER(super_next->node.flags, LAYER_OPAQUE);
+        } else {
+            SET_GRAPH_NODE_LAYER(super_next->node.flags, LAYER_TRANSPARENT);
+
+            Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*6);
+            gDPSetEnvColor(&gfxlist[0], 255, 255, 255, 255-geo_asm->parameter);
+            gSPEndDisplayList(&gfxlist[1]);
+            geo_append_display_list(gfxlist, LAYER_TRANSPARENT);
+        }
     }
+
+    return NULL;
 }
