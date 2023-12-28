@@ -5,6 +5,9 @@
 
 #include "engine/graph_node.h"
 
+#define THROWMATSTACK 20
+#define MATRIX_NULL 250
+
 extern struct GraphNodeRoot        *gCurGraphNodeRoot;
 extern struct GraphNodeMasterList  *gCurGraphNodeMasterList;
 extern struct GraphNodePerspective *gCurGraphNodeCamFrustum;
@@ -93,6 +96,10 @@ struct RenderModeContainer {
 #endif
 
 #define RENDER_PHASE_FIRST 0
+
+extern Mat4 gThrowMatStack[2][THROWMATSTACK];
+extern u16 gThrowMatIndex;
+extern u8 gThrowMatSwap;
 
 void geo_process_node_and_siblings(struct GraphNode *firstNode);
 void geo_process_root(struct GraphNodeRoot *node, Vp *b, Vp *c, s32 clearColor);

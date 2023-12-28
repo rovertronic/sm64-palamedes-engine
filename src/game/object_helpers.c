@@ -1542,6 +1542,12 @@ void obj_set_throw_matrix_from_transform(struct Object *obj) {
     }
 
     obj->header.gfx.throwMatrix = &obj->transform;
+    if (gThrowMatIndex >= THROWMATSTACK)
+        return;
+
+    memcpy(&gThrowMatStack[gThrowMatSwap][gThrowMatIndex], &obj->transform, sizeof(Mat4));
+    obj->header.gfx.matrixID[gThrowMatSwap] = gThrowMatIndex;
+    gThrowMatIndex++;
 
     obj_scale(obj, 1.0f);
 }
@@ -1556,6 +1562,13 @@ void obj_build_transform_relative_to_parent(struct Object *obj) {
     vec3f_copy(&obj->oPosVec, obj->transform[3]);
 
     obj->header.gfx.throwMatrix = &obj->transform;
+
+    if (gThrowMatIndex >= THROWMATSTACK)
+        return;
+
+    memcpy(&gThrowMatStack[gThrowMatSwap][gThrowMatIndex], &obj->transform, sizeof(Mat4));
+    obj->header.gfx.matrixID[gThrowMatSwap] = gThrowMatIndex;
+    gThrowMatIndex++;
 
     obj_scale(obj, 1.0f);
 }
@@ -2202,6 +2215,13 @@ void cur_obj_align_gfx_with_floor(void) {
 
         mtxf_align_terrain_normal(o->transform, floorNormal, position, o->oFaceAngleYaw);
         o->header.gfx.throwMatrix = &o->transform;
+
+        if (gThrowMatIndex >= THROWMATSTACK)
+            return;
+
+        memcpy(&gThrowMatStack[gThrowMatSwap][gThrowMatIndex], &o->transform, sizeof(Mat4));
+        o->header.gfx.matrixID[gThrowMatSwap] = gThrowMatIndex;
+        gThrowMatIndex++;
     }
 }
 

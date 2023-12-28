@@ -189,29 +189,33 @@ s8 turn_obj_away_from_steep_floor(struct Surface *objFloor, f32 floorY, f32 objV
 void obj_orient_graph(struct Object *obj, f32 normalX, f32 normalY, f32 normalZ) {
     Vec3f objVisualPosition, surfaceNormals;
 
-    Mat4 *throwMatrix;
+    Mat4 *throwMatrix = &gThrowMatStack[gThrowMatSwap][gThrowMatIndex];
 
     // Passes on orienting certain objects that shouldn't be oriented, like boulders.
-    if (!sOrientObjWithFloor) {
+    if (sOrientObjWithFloor == FALSE) {
         return;
     }
 
     // Passes on orienting billboard objects, i.e. coins, trees, etc.
-    if (obj->header.gfx.node.flags & GRAPH_RENDER_BILLBOARD) {
+    if ((obj->header.gfx.node.flags & GRAPH_RENDER_BILLBOARD) != 0) {
         return;
     }
 
-    throwMatrix = alloc_display_list(sizeof(*throwMatrix));
-    // If out of memory, fail to try orienting the object.
-    if (throwMatrix == NULL) {
-        return;
-    }
+    objVisualPosition[0] = obj->oPosX;
+    objVisualPosition[1] = obj->oPosY + obj->oGraphYOffset;
+    objVisualPosition[2] = obj->oPosZ;
 
-    vec3f_copy_y_off(objVisualPosition, &obj->oPosVec, obj->oGraphYOffset);
-    vec3f_set(surfaceNormals, normalX, normalY, normalZ);
+    surfaceNormals[0] = normalX;
+    surfaceNormals[1] = normalY;
+    surfaceNormals[2] = normalZ;
 
     mtxf_align_terrain_normal(*throwMatrix, surfaceNormals, objVisualPosition, obj->oFaceAngleYaw);
-    obj->header.gfx.throwMatrix = throwMatrix;
+    obj->header.gfx.throwMatrix = (void *) throwMatrix;
+    
+    if (gThrowMatIndex >= THROWMATSTACK)
+        return;
+    obj->header.gfx.matrixID[gThrowMatSwap] = gThrowMatIndex;
+    gThrowMatIndex++;
 }
 
 /**

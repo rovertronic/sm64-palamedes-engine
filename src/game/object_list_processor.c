@@ -22,7 +22,7 @@
 #include "puppyprint.h"
 #include "puppylights.h"
 #include "profiling.h"
-
+#include "rendering_graph_node.h"
 
 /**
  * Flags controlling what debug info is displayed.
@@ -689,7 +689,10 @@ void update_objects(UNUSED s32 unused) {
         gTimeStopState |= TIME_STOP_ACTIVE;
     } else {
         gTimeStopState &= ~TIME_STOP_ACTIVE;
+        gThrowMatIndex = 0;
+        gThrowMatSwap ^= 1;
     }
+    //bzero(gThrowMatStack[gThrowMatSwap], sizeof(Mat4) * THROWMATSTACK);
 
     gPrevFrameObjectCount = gObjectCounter;
     // Set the recorded behaviour time, minus the difference between the snapshotted collision time and the actual collision time.

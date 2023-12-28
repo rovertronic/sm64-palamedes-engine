@@ -13,6 +13,7 @@
 #include "spawn_object.h"
 #include "types.h"
 #include "puppylights.h"
+#include "rendering_graph_node.h"
 
 /**
  * Attempt to allocate an object from freeList (singly linked) and append it
@@ -193,6 +194,8 @@ struct Object *allocate_object(struct ObjectNode *objList) {
 #endif
     vec3_same(obj->header.gfx.pos, -10000.0f);
     obj->header.gfx.throwMatrix = NULL;
+    obj->header.gfx.matrixID[0] = MATRIX_NULL;
+    obj->header.gfx.matrixID[1] = MATRIX_NULL;
 #ifdef PUPPYLIGHTS
     obj->oLightID = 0xFFFF;
 #endif

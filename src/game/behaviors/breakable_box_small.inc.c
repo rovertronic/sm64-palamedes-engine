@@ -31,6 +31,12 @@ void small_breakable_box_spawn_dust(void) {
 void small_breakable_box_act_move(void) {
     s16 collisionFlags = object_step();
 
+    o->oFloorHeight = find_floor_height(o->oPosX, o->oPosY + 5.0f, o->oPosZ);
+    if (ABS(o->oFloorHeight - o->oPosY) > 2.0f) {
+        o->header.gfx.matrixID[0] = MATRIX_NULL;
+        o->header.gfx.matrixID[1] = MATRIX_NULL;
+    }
+
     obj_attack_collided_from_other_object(o);
 
     if (collisionFlags == OBJ_COL_FLAG_GROUNDED) {
