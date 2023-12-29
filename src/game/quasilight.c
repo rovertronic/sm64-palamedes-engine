@@ -34,8 +34,8 @@ int qsl_dl_count = 0;
 u8 qsl_dl_flagged = FALSE;
 
 Vec3f qsl_global_sun_direction = {0.0f, 1.0f, 0.0f};
-color_u8 qsl_global_sun_color = {60,60,60};//{90/2, 95/2, 100/2};
-color_u8 qsl_global_ambient_color = {60,60,60};//{50/2, 45/2, 50/2};
+color_u8 qsl_global_sun_color = {5,5,5};//{90/2, 95/2, 100/2};
+color_u8 qsl_global_ambient_color = {5,5,5};//{50/2, 45/2, 50/2};
 
 vector_s8 vec3f_to_vector_s8(Vec3f vector) {
     vector_s8 returnvec;
@@ -134,7 +134,7 @@ color_u8 qsl_plane_color(Vec3f position) {
 }
 
 color_u8 qsl_color_env(Vec3f position, Vec3f point_normal, point_light * pl) {
-    f32 sun_coverage = (1.0f + vec3f_dot(point_normal,qsl_global_sun_direction))/2.0f;
+    f32 sun_coverage = CLAMP_0(vec3f_dot(point_normal,qsl_global_sun_direction));
     color_u8 sun_color = qsl_sun_color(position);
 
     color_u8 ambient = qsl_ambient_color(position);
@@ -145,12 +145,29 @@ color_u8 qsl_color_env(Vec3f position, Vec3f point_normal, point_light * pl) {
     vec3f_diff(transformed_light, pl->position, position);
     f32 dist = vec3_mag(transformed_light);
     vec3f_normalize(transformed_light);
-    f32 surf_coverage = (1.0f + vec3f_dot(point_normal,transformed_light))/2.0f;
+    f32 surf_coverage = CLAMP_0(vec3f_dot(point_normal,transformed_light));
 
     color_u8 light_here;
     light_here.r = CLAMP_255(ambient.r + (sun_coverage*sun_color.r) + CLAMP_0(255 - (dist/brightness))*surf_coverage*(point_col.r/127.0f) );
     light_here.g = CLAMP_255(ambient.g + (sun_coverage*sun_color.g) + CLAMP_0(255 - (dist/brightness))*surf_coverage*(point_col.g/127.0f) );
     light_here.b = CLAMP_255(ambient.b + (sun_coverage*sun_color.b) + CLAMP_0(255 - (dist/brightness))*surf_coverage*(point_col.b/127.0f) );
+    return light_here;
+}
+
+color_u8 qsl_color_env_planelight(Vec3f position, Vec3f point_normal) {
+    Vec3f up = {0.0f, -1.0f, 0.0f};
+    f32 sun_coverage = CLAMP_0(vec3f_dot(point_normal,qsl_global_sun_direction));
+    color_u8 sun_color = qsl_sun_color(position);
+
+    color_u8 ambient = qsl_ambient_color(position);
+
+    f32 plane_coverage = 1.0f;//CLAMP_0(vec3f_dot(point_normal,up));
+    color_u8 plane_color = qsl_plane_color(position);
+
+    color_u8 light_here;
+    light_here.r = CLAMP_255(ambient.r + (sun_coverage*sun_color.r) + (plane_coverage*plane_color.r));
+    light_here.g = CLAMP_255(ambient.g + (sun_coverage*sun_color.g) + (plane_coverage*plane_color.g));
+    light_here.b = CLAMP_255(ambient.b + (sun_coverage*sun_color.b) + (plane_coverage*plane_color.b));
     return light_here;
 }
 
@@ -176,6 +193,16 @@ void qsl_update_vtx_list_light(Vtx * terrain, int size) {
     for (int i = 0; i < size; i++) {
         point_light * pl = qsl_pl_nearest(qsl_vertex_pool[qsl_vertex_index].position);
         color_u8 color = qsl_color_env(qsl_vertex_pool[qsl_vertex_index].position, qsl_vertex_pool[qsl_vertex_index].normal, pl);
+        terrain[i].v.cn[0] = color.r;
+        terrain[i].v.cn[1] = color.g;
+        terrain[i].v.cn[2] = color.b;
+        qsl_vertex_index++;
+    }
+}
+
+void qsl_update_vtx_list_planelight(Vtx * terrain, int size) {
+    for (int i = 0; i < size; i++) {
+        color_u8 color = qsl_color_env_planelight(qsl_vertex_pool[qsl_vertex_index].position, qsl_vertex_pool[qsl_vertex_index].normal);
         terrain[i].v.cn[0] = color.r;
         terrain[i].v.cn[1] = color.g;
         terrain[i].v.cn[2] = color.b;
@@ -432,6 +459,24 @@ Gfx *geo_terrain_use_point_light(s32 callContext, struct GraphNode *node, Mat4 *
     if (callContext == GEO_CONTEXT_AREA_LOAD) {
         struct GraphNodeDisplayList * super_next = node->next;
         qsl_add_dl_to_iterator(super_next->displayList, &qsl_update_vtx_list_light, node);
+    }
+    if (callContext == GEO_CONTEXT_RENDER) {
+        Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*6);
+        gSPClearGeometryMode(&gfxlist[0], G_LIGHTING);
+        gSPEndDisplayList(&gfxlist[1]);
+
+        geo_append_display_list(gfxlist, LAYER_OPAQUE);
+        geo_append_display_list(gfxlist, LAYER_ALPHA);
+    }
+
+    return NULL;
+}
+
+Gfx *geo_terrain_use_plane_light(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
+
+    if (callContext == GEO_CONTEXT_AREA_LOAD) {
+        struct GraphNodeDisplayList * super_next = node->next;
+        qsl_add_dl_to_iterator(super_next->displayList, &qsl_update_vtx_list_planelight, node);
     }
     if (callContext == GEO_CONTEXT_RENDER) {
         Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*6);

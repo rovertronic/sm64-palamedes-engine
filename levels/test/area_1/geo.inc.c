@@ -17,6 +17,8 @@ const GeoLayout test_area_1_geo[] = {
 		GEO_DISPLAY_LIST(LAYER_OPAQUE, test_dl_node_004_mesh_layer_1),
 		GEO_ASM(0, geo_terrain_use_point_light),
 		GEO_DISPLAY_LIST(LAYER_OPAQUE, test_dl_node_005_mesh_layer_1),
+		GEO_ASM(0, geo_terrain_use_plane_light),
+		GEO_DISPLAY_LIST(LAYER_OPAQUE, test_dl_node_006_mesh_layer_1),
 		GEO_ASM(0, geo_terrain_use_point_light),
 		GEO_DISPLAY_LIST(LAYER_OPAQUE, test_dl_Plane_mesh_layer_1),
 	GEO_CLOSE_NODE(),

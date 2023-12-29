@@ -48,6 +48,7 @@ void qsl_update_vertex_iterator_thread10(void);
 
 Gfx *geo_object_calculate_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_use_point_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
+Gfx *geo_terrain_use_plane_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_wiggle(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_use_global_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_camera_alpha(s32 callContext, struct GraphNode *node, Mat4 *mtx);
