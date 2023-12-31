@@ -9,8 +9,8 @@
 
 
 
-Gfx mario_darkmariobutton_ci4_aligner[] = {gsSPEndDisplayList()};
-u8 mario_darkmariobutton_ci4[] = {
+Gfx mario_mario_button_ci4_ci4_aligner[] = {gsSPEndDisplayList()};
+u8 mario_mario_button_ci4_ci4[] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -270,9 +270,9 @@ u8 mario_darkmariobutton_ci4[] = {
 	
 };
 
-Gfx mario_darkmariobutton_pal_rgba16_aligner[] = {gsSPEndDisplayList()};
-u8 mario_darkmariobutton_pal_rgba16[] = {
-	0x00, 0x23, 0xf7, 0x81, 0xf7, 0x01, 0xf6, 0x81, 
+Gfx mario_mario_button_ci4_pal_rgba16_aligner[] = {gsSPEndDisplayList()};
+u8 mario_mario_button_ci4_pal_rgba16[] = {
+	0x00, 0x3f, 0xf7, 0x81, 0xf7, 0x01, 0xf6, 0x81, 
 	0xf6, 0x01, 0xed, 0x81, 0xe5, 0x01, 0xe5, 0x81, 
 	0xe4, 0xc1, 0xcc, 0x81, 0xe6, 0x01, 0xee, 0x81, 
 	0xdd, 0x41, 0xef, 0x01, 0xbc, 0x01, 0xb3, 0xc1, 
@@ -796,8 +796,8 @@ u8 mario_metal_rgba16[] = {
 	
 };
 
-Gfx mario_dark_mario_icon_ci4_aligner[] = {gsSPEndDisplayList()};
-u8 mario_dark_mario_icon_ci4[] = {
+Gfx mario_mario_icon_CI4_ci4_aligner[] = {gsSPEndDisplayList()};
+u8 mario_mario_icon_CI4_ci4[] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -1057,9 +1057,9 @@ u8 mario_dark_mario_icon_ci4[] = {
 	
 };
 
-Gfx mario_dark_mario_icon_pal_rgba16_aligner[] = {gsSPEndDisplayList()};
-u8 mario_dark_mario_icon_pal_rgba16[] = {
-	0x80, 0x01, 0xff, 0xff, 
+Gfx mario_mario_icon_CI4_pal_rgba16_aligner[] = {gsSPEndDisplayList()};
+u8 mario_mario_icon_CI4_pal_rgba16[] = {
+	0xf8, 0x01, 0xff, 0xff, 
 };
 
 Gfx mario_hdeye_ci4_aligner[] = {gsSPEndDisplayList()};
@@ -5981,11 +5981,11 @@ Gfx mat_mario_body_v3[] = {
 	gsDPSetCombineLERP(TEXEL0, ENVIRONMENT, SHADE, SHADE, 0, 0, 0, ENVIRONMENT, TEXEL0, ENVIRONMENT, SHADE, SHADE, 0, 0, 0, ENVIRONMENT),
 	gsDPSetTextureLUT(G_TT_RGBA16),
 	gsSPTexture(65535, 65535, 0, 0, 1),
-	gsDPSetEnvColor(188, 188, 188, 255),
-	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, mario_darkmariobutton_pal_rgba16),
+	gsDPSetEnvColor(203, 203, 225, 255),
+	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, mario_mario_button_ci4_pal_rgba16),
 	gsDPSetTile(0, 0, 0, 256, 5, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
 	gsDPLoadTLUTCmd(5, 15),
-	gsDPSetTextureImage(G_IM_FMT_CI, G_IM_SIZ_16b, 1, mario_darkmariobutton_ci4),
+	gsDPSetTextureImage(G_IM_FMT_CI, G_IM_SIZ_16b, 1, mario_mario_button_ci4_ci4),
 	gsDPSetTile(G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
 	gsDPLoadBlock(7, 0, 0, 1023, 512),
 	gsDPSetTile(G_IM_FMT_CI, G_IM_SIZ_4b, 4, 0, 0, 0, G_TX_CLAMP | G_TX_NOMIRROR, 6, 0, G_TX_CLAMP | G_TX_MIRROR, 6, 0),
@@ -6023,11 +6023,11 @@ Gfx mat_mario_cap_v3[] = {
 	gsDPSetCombineLERP(TEXEL0, ENVIRONMENT, SHADE, SHADE, 0, 0, 0, ENVIRONMENT, TEXEL0, ENVIRONMENT, SHADE, SHADE, 0, 0, 0, ENVIRONMENT),
 	gsDPSetTextureLUT(G_TT_RGBA16),
 	gsSPTexture(65535, 65535, 0, 0, 1),
-	gsDPSetEnvColor(188, 188, 188, 255),
-	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, mario_dark_mario_icon_pal_rgba16),
+	gsDPSetEnvColor(203, 203, 211, 255),
+	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, mario_mario_icon_CI4_pal_rgba16),
 	gsDPSetTile(0, 0, 0, 256, 5, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
 	gsDPLoadTLUTCmd(5, 1),
-	gsDPSetTextureImage(G_IM_FMT_CI, G_IM_SIZ_16b, 1, mario_dark_mario_icon_ci4),
+	gsDPSetTextureImage(G_IM_FMT_CI, G_IM_SIZ_16b, 1, mario_mario_icon_CI4_ci4),
 	gsDPSetTile(G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
 	gsDPLoadBlock(7, 0, 0, 1023, 512),
 	gsDPSetTile(G_IM_FMT_CI, G_IM_SIZ_4b, 4, 0, 0, 0, G_TX_CLAMP | G_TX_NOMIRROR, 6, 0, G_TX_CLAMP | G_TX_NOMIRROR, 6, 0),
