@@ -34,8 +34,8 @@ int qsl_dl_count = 0;
 u8 qsl_dl_flagged = FALSE;
 
 Vec3f qsl_global_sun_direction = {0.0f, 1.0f, 0.0f};
-color_u8 qsl_global_sun_color = {5,5,5};//{90/2, 95/2, 100/2};
-color_u8 qsl_global_ambient_color = {5,5,5};//{50/2, 45/2, 50/2};
+color_u8 qsl_global_sun_color = {255,255,255};//{90/2, 95/2, 100/2};
+color_u8 qsl_global_ambient_color = {127,127,127};//{50/2, 45/2, 50/2};
 
 vector_s8 vec3f_to_vector_s8(Vec3f vector) {
     vector_s8 returnvec;
@@ -231,6 +231,62 @@ void qsl_update_vtx_list_camera_alpha(Vtx * terrain, int size) {
         if (dot1 > 0) {
             qsl_dl_flagged = TRUE;
         }
+        qsl_vertex_index++;
+    }
+}
+
+f32 real_smoothstep(f32 edge0, f32 edge1, f32 x)
+{
+    f32 t = (x - edge0) / (edge1 - edge0);
+    if (t > 1.0f) {
+        t = 1.0f;
+    }
+    if (t < 0.0f) {
+        t = 0.0f;
+    }
+    return t * t * (3.0 - 2.0 * t);
+}
+
+void qsl_update_vtx_list_fancy_water(Vtx * terrain, int size) {
+    for (int i = 0; i < size; i++) {
+        Vec3f transformed_camera;
+        vec3f_diff(transformed_camera, gLakituState.pos, qsl_vertex_pool[qsl_vertex_index].position);
+        f32 dist = vec3_mag(transformed_camera);
+
+        s16 x = terrain[i].v.ob[0];
+        s16 z = terrain[i].v.ob[2];
+        terrain[i].v.ob[1] = qsl_vertex_pool[qsl_vertex_index].position[1] + (sins((x + gGlobalTimer)*0x200)+coss((z + gGlobalTimer)*0x200)) * 30.0f;
+
+        f32 alpha = 255.0f*real_smoothstep(1500.0f,1700.0f,dist);
+        f32 highlight = 0.0f;
+
+        //calculate alpha
+        if ((dist > 5500.0f)&&(dist < 6000.0f)) {
+            alpha = 255.0f - (155.0f*real_smoothstep(5500.0f,6000.0f,dist));
+        }
+        if ((dist > 6000.0f)&&(dist < 7000.0f)) {
+            alpha = 100;
+        }
+        if ((dist > 7000.0f)&&(dist < 7500.0f)) {
+            alpha = 100.0f + (155.0f*real_smoothstep(7000.0f,7500.0f,dist));
+        }
+
+        //calculate white highlight
+        if ((dist > 4000.0f)&&(dist < 4500.0f)) {
+            highlight = real_smoothstep(4000.0f,4500.0f,dist);
+        }
+        if ((dist > 4500.0f)&&(dist < 5000.0f)) {
+            highlight = 1.0f;
+        }
+        if ((dist > 5000.0f)&&(dist < 5500.0f)) {
+            highlight = 1.0f-real_smoothstep(5000.0f,5500.0f,dist);
+        }
+
+        terrain[i].v.cn[0] = 120.0f+(highlight*135.0f);
+        terrain[i].v.cn[1] = 180.0f+(highlight*75.0f);
+        terrain[i].v.cn[2] = 230.0f+(highlight*25.0f);
+        terrain[i].v.cn[3] = alpha;
+
         qsl_vertex_index++;
     }
 }
@@ -537,6 +593,16 @@ Gfx *geo_terrain_camera_alpha(s32 callContext, struct GraphNode *node, Mat4 *mtx
             gSPEndDisplayList(&gfxlist[1]);
             geo_append_display_list(gfxlist, LAYER_TRANSPARENT);
         }
+    }
+
+    return NULL;
+}
+
+Gfx *geo_fancy_water(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
+
+    if (callContext == GEO_CONTEXT_AREA_LOAD) {
+        struct GraphNodeDisplayList * super_next = node->next;
+        qsl_add_dl_to_iterator(super_next->displayList, &qsl_update_vtx_list_fancy_water, node);
     }
 
     return NULL;

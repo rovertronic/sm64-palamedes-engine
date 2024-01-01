@@ -52,5 +52,6 @@ Gfx *geo_terrain_use_plane_light(s32 callContext, struct GraphNode *node, Mat4 *
 Gfx *geo_terrain_wiggle(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_use_global_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_camera_alpha(s32 callContext, struct GraphNode *node, Mat4 *mtx);
+Gfx *geo_fancy_water(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 
 #endif

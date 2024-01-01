@@ -1,0 +1,11 @@
+extern const GeoLayout waterdemo_area_1_geo[];
+extern const GeoLayout waterdemo_area_1[];
+extern const Collision waterdemo_area_1_collision[];
+extern const MacroObject waterdemo_area_1_macro_objs[];
+extern u8 waterdemo_dl_fancy_water_i8[];
+extern Vtx waterdemo_dl_Plane_mesh_layer_5_vtx_0[1433];
+extern Gfx waterdemo_dl_Plane_mesh_layer_5_tri_0[];
+extern Gfx mat_waterdemo_dl_fancy_water_layer5[];
+extern Gfx mat_revert_waterdemo_dl_fancy_water_layer5[];
+extern Gfx waterdemo_dl_Plane_mesh_layer_5[];
+extern Gfx waterdemo_dl_material_revert_render_settings[];
