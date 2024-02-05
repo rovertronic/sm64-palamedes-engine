@@ -247,6 +247,7 @@ struct GraphNodeObject {
     /*0x38*/ struct AnimInfo animInfo;
     /*0x4C*/ struct SpawnInfo *spawnInfo;
     /*0x50*/ Mat4 *throwMatrix; // matrix ptr
+             Mat4 manualMatrix;
     /*0x54*/ Vec3f cameraToObject;
 
     Vec3f posLerp;
@@ -254,6 +255,7 @@ struct GraphNodeObject {
     Vec3s angleLerp;
     u8 matrixID[2];
     u8 bothMats;
+    u8 useManualMatrix;
 
 #ifdef OBJECTS_REJ
     u16 ucode;

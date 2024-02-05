@@ -79,7 +79,9 @@ void align_with_floor(struct MarioState *m) {
 #else
         mtxf_align_terrain_triangle(sFloorAlignMatrix[m->playerID], m->pos, m->faceAngle[1], 40.0f);
 #endif
-        m->marioObj->header.gfx.throwMatrix = &sFloorAlignMatrix[m->playerID];
+        //m->marioObj->header.gfx.throwMatrix = &sFloorAlignMatrix[m->playerID];
+        m->marioObj->header.gfx.useManualMatrix = TRUE;
+        mtxf_copy(&m->marioObj->header.gfx.manualMatrix,sFloorAlignMatrix[m->playerID]);
     }
 }
 

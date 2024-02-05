@@ -945,6 +945,8 @@ u32 set_mario_action_cutscene(struct MarioState *m, u32 action, UNUSED u32 actio
  * specific function if needed.
  */
 u32 set_mario_action(struct MarioState *m, u32 action, u32 actionArg) {
+    m->marioObj->header.gfx.useManualMatrix = FALSE;
+    
     switch (action & ACT_GROUP_MASK) {
         case ACT_GROUP_MOVING:    action = set_mario_action_moving(   m, action, actionArg); break;
         case ACT_GROUP_AIRBORNE:  action = set_mario_action_airborne( m, action, actionArg); break;

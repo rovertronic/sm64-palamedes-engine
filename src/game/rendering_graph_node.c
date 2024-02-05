@@ -1209,6 +1209,10 @@ void geo_process_object(struct Object *node) {
         warp_node(node);
     }
 
+    if (node->header.gfx.useManualMatrix) {
+        node->header.gfx.throwMatrix = &node->header.gfx.manualMatrix;
+    }
+
     if (node->header.gfx.areaIndex == gCurGraphNodeRoot->areaIndex) {
         s32 isInvisible = (node->header.gfx.node.flags & GRAPH_RENDER_INVISIBLE);
         s32 noThrowMatrix = (node->header.gfx.throwMatrix == NULL);
@@ -1222,6 +1226,9 @@ void geo_process_object(struct Object *node) {
         else{
             if (!noThrowMatrix) {
                 mtxf_scale_vec3f(gMatStack[gMatStackIndex + 1], *node->header.gfx.throwMatrix, node->header.gfx.scaleLerp);
+                gMatStack[gMatStackIndex + 1][3][0] = node->header.gfx.posLerp[0];
+                gMatStack[gMatStackIndex + 1][3][1] = node->header.gfx.posLerp[1];
+                gMatStack[gMatStackIndex + 1][3][2] = node->header.gfx.posLerp[2];
             } else if (node->header.gfx.node.flags & GRAPH_RENDER_BILLBOARD) {
                 mtxf_billboard(gMatStack[gMatStackIndex + 1], gMatStack[gMatStackIndex],
                             node->header.gfx.posLerp, node->header.gfx.scaleLerp, gCurGraphNodeCamera->roll);

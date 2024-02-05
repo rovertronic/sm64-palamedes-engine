@@ -314,6 +314,7 @@ struct GraphNodeObject *init_graph_node_object(struct AllocOnlyPool *pool,
         graphNode->animInfo.animTimer = 0;
         graphNode->bothMats = 0;
         graphNode->node.flags |= GRAPH_RENDER_HAS_ANIMATION;
+        graphNode->useManualMatrix = FALSE;
     }
 
     return graphNode;
