@@ -40,6 +40,8 @@ void debug_box_pos(Vec3f pMin, Vec3f pMax, s32 type);
 void debug_box_pos_rot(Vec3f pMin, Vec3f pMax, s16 yaw, s32 type);
 
 void render_debug_boxes(s32 type);
+
+void visual_surface_display(Vtx *verts, s32 iteration);
 extern void visual_surface_loop(void);
 
 #endif

@@ -22,6 +22,7 @@
 #include "config.h"
 #include "config/config_world.h"
 #include "quasilight.h"
+#include "edging_shadow.h"
 
 #include "lerp.h"
 #include "level_update.h"
@@ -450,9 +451,13 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
 #ifdef VISUAL_DEBUG
     if ( hitboxView) render_debug_boxes(DEBUG_UCODE_DEFAULT | DEBUG_BOX_CLEAR);
     // Load the world scale identity matrix
-    gSPMatrix(gDisplayListHead++, &identityMatrixWorldScale, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    if (surfaceView) visual_surface_loop();
+    //gSPMatrix(gDisplayListHead++, &identityMatrixWorldScale, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    //if (surfaceView) visual_surface_loop();
+    //render_edging_shadow();
 #endif
+    gSPMatrix(gDisplayListHead++, &identityMatrixWorldScale, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    render_edging_shadow();
+
 }
 
 /**
