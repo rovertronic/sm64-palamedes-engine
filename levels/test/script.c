@@ -43,7 +43,7 @@ const LevelScript level_test_entry[] = {
 		OBJECT(MODEL_STAR, 3341, 2205, -6803, 0, 0, 0, 0x00000000, bhvStar),
 		TERRAIN(test_area_1_collision),
 		MACRO_OBJECTS(test_area_1_macro_objs),
-		SET_BACKGROUND_MUSIC(0x00, SEQ_LEVEL_SNOW),
+		//SET_BACKGROUND_MUSIC(0x00, SEQ_LEVEL_SNOW),
 		TERRAIN_TYPE(TERRAIN_GRASS),
 		/* Fast64 begin persistent block [area commands] */
 		/* Fast64 end persistent block [area commands] */

@@ -39,7 +39,7 @@
 #define SEGMENT_GROUP0_GEO           0x17 // | Segment 23 | /actors/group0_geo
 #define SEGMENT_DEMO_INPUTS          0x18 // | Segment 24 | Demo Inputs List
 #define SEGMENT_EU_TRANSLATION       0x19 // | Segment 25 | EU language translations
-#define SEGMENT_UNKNOWN_26           0x1A // | Segment 26 | Unknown/Unused?
+#define SEGMENT_MARIO_ANIMS_2        0x1A // | Segment 26 | Unknown/Unused?
 #define SEGMENT_UNKNOWN_27           0x1B // | Segment 27 | Unknown/Unused?
 #define SEGMENT_UNKNOWN_28           0x1C // | Segment 28 | Unknown/Unused?
 #define SEGMENT_UNKNOWN_29           0x1D // | Segment 29 | Unknown/Unused?

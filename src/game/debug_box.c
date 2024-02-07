@@ -197,7 +197,65 @@ s32 gVisualOffset;
 extern s32 gSurfaceNodesAllocated;
 extern s32 gSurfacesAllocated;
 
-void iterate_surfaces_visual(s32 x, s32 z, Vtx *verts) {
+void generate_super_shadow_vtx(s32 x, s32 y, s32 z, Vtx *verts) {
+    struct SurfaceNode *node;
+    struct Surface *surf;
+
+    if (is_outside_level_bounds(x, z)) return;
+
+    s32 cellX = GET_CELL_COORD(x);
+    s32 cellZ = GET_CELL_COORD(z);
+    
+    gVisualSurfaceCount = 0;
+
+    for (u8 i = 0; i < 4; i++) {
+        switch (i) {
+            case 0: node = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS ].next; break;
+            case 1: node =  gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS ].next; break;
+            case 2: node = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS].next; break;
+            case 3: node =  gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS].next; break;
+        }
+
+        while (node != NULL) {
+            surf = node->surface;
+            node = node->next;
+
+            s32 y1 = surf->vertex1[1];
+            s32 y2 = surf->vertex2[1];
+            s32 y3 = surf->vertex3[1];
+
+            switch (i) {
+                case 0:
+                case 1:
+                    // Wall cutoff
+                    if (y1 > y) {
+                        y1 = y;
+                    }
+                    if (y2 > y) {
+                        y2 = y;
+                    }
+                    if (y3 > y) {
+                        y3 = y;
+                    }
+                    break;
+                case 2:
+                case 3:
+                    // Floor cutoff
+                    if (y < surf->lowerY) {
+                        continue;
+                    }
+                    break;
+            }
+                                                                                                            // UV PROJECTION
+            make_vertex(verts, (gVisualSurfaceCount + 0), surf->vertex1[0], y1, surf->vertex1[2], (surf->vertex1[0]-x)*7+512, (surf->vertex1[2]-z)*7+512, 0xFF, 0xFF, 0xFF, 0xFF);
+            make_vertex(verts, (gVisualSurfaceCount + 1), surf->vertex2[0], y2, surf->vertex2[2], (surf->vertex2[0]-x)*7+512, (surf->vertex2[2]-z)*7+512, 0xFF, 0xFF, 0xFF, 0xFF);
+            make_vertex(verts, (gVisualSurfaceCount + 2), surf->vertex3[0], y3, surf->vertex3[2], (surf->vertex3[0]-x)*7+512, (surf->vertex3[2]-z)*7+512, 0xFF, 0xFF, 0xFF, 0xFF);
+            gVisualSurfaceCount += 3;
+        }
+    }
+}
+
+void iterate_surfaces_visual(s32 x, s32 y, s32 z, Vtx *verts) {
     struct SurfaceNode *node;
     struct Surface *surf;
     s32 i = 0;
@@ -224,14 +282,10 @@ void iterate_surfaces_visual(s32 x, s32 z, Vtx *verts) {
             surf = node->surface;
             node = node->next;
 
-            if (SURFACE_IS_INSTANT_WARP(surf->type)) {
-                make_vertex(verts, (gVisualSurfaceCount + 0), surf->vertex1[0], surf->vertex1[1], surf->vertex1[2], 0, 0, 0xFF, 0xA0, 0x00, 0x80);
-                make_vertex(verts, (gVisualSurfaceCount + 1), surf->vertex2[0], surf->vertex2[1], surf->vertex2[2], 0, 0, 0xFF, 0xA0, 0x00, 0x80);
-                make_vertex(verts, (gVisualSurfaceCount + 2), surf->vertex3[0], surf->vertex3[1], surf->vertex3[2], 0, 0, 0xFF, 0xA0, 0x00, 0x80);
-            } else {
-                make_vertex(verts, (gVisualSurfaceCount + 0), surf->vertex1[0], surf->vertex1[1], surf->vertex1[2], 0, 0, col[0], col[1], col[2], 0x80);
-                make_vertex(verts, (gVisualSurfaceCount + 1), surf->vertex2[0], surf->vertex2[1], surf->vertex2[2], 0, 0, col[0], col[1], col[2], 0x80);
-                make_vertex(verts, (gVisualSurfaceCount + 2), surf->vertex3[0], surf->vertex3[1], surf->vertex3[2], 0, 0, col[0], col[1], col[2], 0x80);
+            if (surf->lowerY < y) {                                                                                 // UV PROJECTION
+                make_vertex(verts, (gVisualSurfaceCount + 0), surf->vertex1[0], surf->vertex1[1], surf->vertex1[2], (surf->vertex1[0]-x)*10, (surf->vertex1[2]-z)*10, col[0], col[1], col[2], 0x80);
+                make_vertex(verts, (gVisualSurfaceCount + 1), surf->vertex2[0], surf->vertex2[1], surf->vertex2[2], (surf->vertex2[0]-x)*10, (surf->vertex2[2]-z)*10, col[0], col[1], col[2], 0x80);
+                make_vertex(verts, (gVisualSurfaceCount + 2), surf->vertex3[0], surf->vertex3[1], surf->vertex3[2], (surf->vertex3[0]-x)*10, (surf->vertex3[2]-z)*10, col[0], col[1], col[2], 0x80);
             }
 
             gVisualSurfaceCount += 3;
@@ -276,6 +330,8 @@ void visual_surface_display(Vtx *verts, s32 iteration) {
     s32 vtl = 0;
     s32 count = VERTCOUNT;
     s32 ntx = 0;
+
+    vts = gVisualSurfaceCount;
 
     while (vts > 0) {
         if (count == VERTCOUNT) {
@@ -343,13 +399,15 @@ s32 iterate_surface_count(s32 x, s32 z) {
     return j;
 }
 
+Vtx cumpooplist[0x4000];
+extern Gfx dl_super_shadow[];
 void visual_surface_loop(void) {
     if (!gSurfaceNodesAllocated
      || !gSurfacesAllocated
      || !gMarioState->marioObj) {
         return;
     }
-    Vtx *verts = alloc_display_list((iterate_surface_count(gMarioState->pos[0], gMarioState->pos[2]) * 3) * sizeof(Vtx));
+    Vtx *verts = cumpooplist;//alloc_display_list((iterate_surface_count(gMarioState->pos[0], gMarioState->pos[2]) * 3) * sizeof(Vtx));
 
     gVisualSurfaceCount = 0;
     gVisualOffset       = 0;
@@ -359,16 +417,17 @@ void visual_surface_loop(void) {
     }
 
     gSPDisplayList(gDisplayListHead++, dl_visual_surface);
-
-    iterate_surfaces_visual(gMarioState->pos[0], gMarioState->pos[2], verts);
+    gSPDisplayList(gDisplayListHead++, dl_super_shadow);
+    gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, 200);
+    generate_super_shadow_vtx(gMarioState->pos[0], gMarioState->pos[1]+50, gMarioState->pos[2], verts);
 
     visual_surface_display(verts, 0);
 
-    iterate_surfaces_envbox(verts);
+    //iterate_surfaces_envbox(verts);
 
-    gDPSetRenderMode(gDisplayListHead++, G_RM_ZB_XLU_SURF, G_RM_NOOP2);
+    //gDPSetRenderMode(gDisplayListHead++, G_RM_ZB_XLU_SURF, G_RM_NOOP2);
 
-    visual_surface_display(verts, 1);
+    //visual_surface_display(verts, 1);
 
     gSPDisplayList(gDisplayListHead++, dl_debug_box_end);
 }

@@ -720,6 +720,8 @@ void init_controllers(void) {
 // Game thread core
 // ----------------------------------------------------------------------------------------------------
 
+extern struct DmaHandlerList gMarioGfxAnimBuf;
+extern u8 gMarioAnimHeap[0x4000];
 /**
  * Setup main segments and framebuffers.
  */
@@ -740,6 +742,8 @@ void setup_game_memory(void) {
     gMarioAnimsMemAlloc = main_pool_alloc(MARIO_ANIMS_POOL_SIZE, MEMORY_POOL_LEFT);
     set_segment_base_addr(SEGMENT_MARIO_ANIMS, (void *) gMarioAnimsMemAlloc);
     setup_dma_table_list(&gMarioAnimsBuf, gMarioAnims, gMarioAnimsMemAlloc);
+    set_segment_base_addr(SEGMENT_MARIO_ANIMS_2, (void *) gMarioAnimsMemAlloc);
+    setup_dma_table_list(&gMarioGfxAnimBuf, gMarioAnims, &gMarioAnimHeap);
 #ifdef PUPPYPRINT_DEBUG
     set_segment_memory_printout(SEGMENT_MARIO_ANIMS, MARIO_ANIMS_POOL_SIZE);
     set_segment_memory_printout(SEGMENT_DEMO_INPUTS, DEMO_INPUTS_POOL_SIZE);

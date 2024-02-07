@@ -175,7 +175,7 @@ static void add_shadow_to_display_list(Gfx *displayListHead, s8 shadowType) {
         gSPDisplayList(displayListHead++, dl_shadow_square);
     }
     gDPSetEnvColor(displayListHead++, 255, 255, 255, s->solidity);
-    gSPDisplayList(displayListHead++, dl_shadow_end);
+    gSPDisplayList(displayListHead++, dl_shadow_circle);
     gSPEndDisplayList(displayListHead);
 }
 

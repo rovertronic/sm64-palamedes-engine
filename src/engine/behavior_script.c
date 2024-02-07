@@ -908,6 +908,10 @@ void cur_obj_update(void) {
         obj_update_gfx_pos_and_angle(o);
     }
 
+    if (gCurrentObject->header.gfx.animInfo.curAnim != NULL) {
+        gCurrentObject->header.gfx.animInfo.animFrame = geo_update_animation_frame(&gCurrentObject->header.gfx.animInfo, &gCurrentObject->header.gfx.animInfo.animFrameAccelAssist);
+    }
+
 #if SILHOUETTE
     COND_BIT((objFlags & OBJ_FLAG_SILHOUETTE        ), o->header.gfx.node.flags, GRAPH_RENDER_SILHOUETTE        );
     COND_BIT((objFlags & OBJ_FLAG_OCCLUDE_SILHOUETTE), o->header.gfx.node.flags, GRAPH_RENDER_OCCLUDE_SILHOUETTE);
