@@ -24,6 +24,7 @@ typedef struct {
     Gfx * dl;
     void (*func)(Vtx * terrain, int size);
     struct GraphNode *node;
+    float_vertex * addr;
 } dl_to_iterate;
 
 typedef struct {
@@ -45,13 +46,12 @@ vector_s8 qsl_sun_direction(Vec3f position);
 color_u8 qsl_sun_color(Vec3f position);
 
 void qsl_update_vertex_iterator_thread10(void);
+void qsl_reset(void);
 
 Gfx *geo_object_calculate_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_use_point_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_wiggle(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_use_global_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_camera_alpha(s32 callContext, struct GraphNode *node, Mat4 *mtx);
-
-extern int qsl_point_light_count;
 
 #endif

@@ -184,8 +184,7 @@ void load_obj_warp_nodes(void) {
 void clear_areas(void) {
     s32 i, j;
 
-    osStopThread(&gQuasilightThread);
-    qsl_point_light_count = 0;
+    qsl_reset();
 
     gCurrentArea = NULL;
     gWarpTransition.isActive = FALSE;

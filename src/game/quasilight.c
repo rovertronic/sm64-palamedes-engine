@@ -22,13 +22,12 @@ and have a vertex wiggle animation.
 #define CLAMP_0(x) ((x < 0) ? 0 : x)
 #define CLAMP_255(x) ((x > 255) ? 255 : x)
 
-float_vertex qsl_vertex_pool[10000];
 int qsl_vertex_index = 0;
 
 point_light qsl_point_light_pool[20];
 int qsl_point_light_count = 0;
 
-dl_to_iterate qsl_dl_pool[10];
+dl_to_iterate qsl_dl_pool[20];
 dl_to_iterate * curr_qsl_dl;
 int qsl_dl_count = 0;
 u8 qsl_dl_flagged = FALSE;
@@ -158,14 +157,14 @@ u8 penis_debug = 0;
 
 void qsl_init_vtx_list(Vtx * terrain, int size) {
     for (int i = 0; i < size; i++) {
-        qsl_vertex_pool[qsl_vertex_index].normal[0] = terrain[i].n.n[0];
-        qsl_vertex_pool[qsl_vertex_index].normal[1] = terrain[i].n.n[1];
-        qsl_vertex_pool[qsl_vertex_index].normal[2] = terrain[i].n.n[2];
-        vec3f_normalize(qsl_vertex_pool[qsl_vertex_index].normal);
+        curr_qsl_dl->addr[qsl_vertex_index].normal[0] = terrain[i].n.n[0];
+        curr_qsl_dl->addr[qsl_vertex_index].normal[1] = terrain[i].n.n[1];
+        curr_qsl_dl->addr[qsl_vertex_index].normal[2] = terrain[i].n.n[2];
+        vec3f_normalize(curr_qsl_dl->addr[qsl_vertex_index].normal);
 
-        qsl_vertex_pool[qsl_vertex_index].position[0] = terrain[i].v.ob[0];
-        qsl_vertex_pool[qsl_vertex_index].position[1] = terrain[i].v.ob[1];
-        qsl_vertex_pool[qsl_vertex_index].position[2] = terrain[i].v.ob[2];
+        curr_qsl_dl->addr[qsl_vertex_index].position[0] = terrain[i].v.ob[0];
+        curr_qsl_dl->addr[qsl_vertex_index].position[1] = terrain[i].v.ob[1];
+        curr_qsl_dl->addr[qsl_vertex_index].position[2] = terrain[i].v.ob[2];
         qsl_vertex_index ++;
     }
 };
@@ -174,8 +173,8 @@ void qsl_update_vtx_list_light(Vtx * terrain, int size) {
     if (qsl_point_light_count==0) {return;}
 
     for (int i = 0; i < size; i++) {
-        point_light * pl = qsl_pl_nearest(qsl_vertex_pool[qsl_vertex_index].position);
-        color_u8 color = qsl_color_env(qsl_vertex_pool[qsl_vertex_index].position, qsl_vertex_pool[qsl_vertex_index].normal, pl);
+        point_light * pl = qsl_pl_nearest(curr_qsl_dl->addr[qsl_vertex_index].position);
+        color_u8 color = qsl_color_env(curr_qsl_dl->addr[qsl_vertex_index].position, curr_qsl_dl->addr[qsl_vertex_index].normal, pl);
         terrain[i].v.cn[0] = color.r;
         terrain[i].v.cn[1] = color.g;
         terrain[i].v.cn[2] = color.b;
@@ -188,7 +187,7 @@ void qsl_update_vtx_list_wiggle(Vtx * terrain, int size) {
         s16 x = terrain[i].v.ob[0];
         s16 z = terrain[i].v.ob[2];
 
-        terrain[i].v.ob[1] = qsl_vertex_pool[qsl_vertex_index].position[1] + sins((x + z + gGlobalTimer)*0x400) * 30.0f;
+        terrain[i].v.ob[1] = curr_qsl_dl->addr[qsl_vertex_index].position[1] + sins((x + z + gGlobalTimer)*0x400) * 30.0f;
 
         qsl_vertex_index++;
     }
@@ -197,9 +196,9 @@ void qsl_update_vtx_list_wiggle(Vtx * terrain, int size) {
 void qsl_update_vtx_list_camera_alpha(Vtx * terrain, int size) {
     for (int i = 0; i < size; i++) {
         Vec3f vert_to_mario;
-        vec3f_diff(vert_to_mario,gMarioState->pos,qsl_vertex_pool[qsl_vertex_index].position);
+        vec3f_diff(vert_to_mario,gMarioState->pos,curr_qsl_dl->addr[qsl_vertex_index].position);
         vec3f_normalize(vert_to_mario);
-        f32 dot1 = vec3f_dot(qsl_vertex_pool[qsl_vertex_index].normal, vert_to_mario);
+        f32 dot1 = vec3f_dot(curr_qsl_dl->addr[qsl_vertex_index].normal, vert_to_mario);
 
         if (dot1 > 0) {
             qsl_dl_flagged = TRUE;
@@ -227,10 +226,10 @@ void qsl_update_vertex_iterator_thread10(void) {
 
     while (TRUE) {
 
-        qsl_vertex_index = 0;
         for (int i = 0; i<qsl_dl_count; i++) {
             qsl_dl_flagged = FALSE;
             curr_qsl_dl = &qsl_dl_pool[i];
+            qsl_vertex_index = 0;
 
             command_read = segmented_to_virtual(qsl_dl_pool[i].dl);
             end_of_list = FALSE;
@@ -273,7 +272,9 @@ void qsl_add_dl_to_iterator(Gfx * dl_to_add, void (*func_to_add)(Vtx * terrain, 
     int qsl_gfx_stack_level = 0;
     u8 end_of_list = FALSE;
     u32 * qsl_gfx_stack[40];
+    u32 total_size = 0;
 
+    // Calculate size and allocate memory
     while(!end_of_list) {
         if  ( ((*command_read)>>24) == G_DL)  {
             qsl_gfx_stack[qsl_gfx_stack_level] = command_read+2;
@@ -282,7 +283,40 @@ void qsl_add_dl_to_iterator(Gfx * dl_to_add, void (*func_to_add)(Vtx * terrain, 
         }
         if ( ((*command_read)>>24) == G_VTX) {
             int size = (((*command_read)>>12) & 0xFF);
+            total_size += (size * sizeof(float_vertex));
+        }
+        if ( ((*command_read)>>24) == G_ENDDL) {
+            if (qsl_gfx_stack_level == 0) {
+                end_of_list = TRUE;
+            } else {
+                qsl_gfx_stack_level--;
+                command_read = qsl_gfx_stack[qsl_gfx_stack_level];
+            }
+        } else {
+            command_read+=2;
+        }
+    }
 
+    curr_qsl_dl = &qsl_dl_pool[qsl_dl_count];
+    qsl_dl_pool[qsl_dl_count].dl = dl_to_add;
+    qsl_dl_pool[qsl_dl_count].func = func_to_add;
+    qsl_dl_pool[qsl_dl_count].node = node;
+    qsl_dl_pool[qsl_dl_count].addr = main_pool_alloc(total_size,MEMORY_POOL_LEFT);
+
+    qsl_gfx_stack_level = 0;
+    end_of_list = FALSE;
+    command_read = segmented_to_virtual(dl_to_add);
+    qsl_vertex_index = 0;
+
+    // Populate allocated memory with verices
+    while(!end_of_list) {
+        if  ( ((*command_read)>>24) == G_DL)  {
+            qsl_gfx_stack[qsl_gfx_stack_level] = command_read+2;
+            qsl_gfx_stack_level++;
+            command_read = segmented_to_virtual(*(command_read+1));
+        }
+        if ( ((*command_read)>>24) == G_VTX) {
+            int size = (((*command_read)>>12) & 0xFF);
             qsl_init_vtx_list( segmented_to_virtual(*(command_read+1)), size);
         }
         if ( ((*command_read)>>24) == G_ENDDL) {
@@ -297,16 +331,22 @@ void qsl_add_dl_to_iterator(Gfx * dl_to_add, void (*func_to_add)(Vtx * terrain, 
         }
     }
 
-    qsl_dl_pool[qsl_dl_count].dl = dl_to_add;
-    qsl_dl_pool[qsl_dl_count].func = func_to_add;
-    qsl_dl_pool[qsl_dl_count].node = node;
-
     if (qsl_dl_count == 0) {
         osStartThread(&gQuasilightThread);
     }
     qsl_dl_count++;
 }
 
+void qsl_reset(void) {
+    osStopThread(&gQuasilightThread);
+    qsl_point_light_count = 0;
+    if (qsl_dl_count > 0) {
+        //SM64's memory allocation system is stack based, so this will effectively clear out everything allocated
+        //by the vertex iterator even though I'm only running it on the first element
+        main_pool_free(qsl_dl_pool[0].addr);
+        qsl_dl_count = 0;
+    }
+}
 
 /* GEO ASMs
 All these functions apply to whatever model / object you put them on.
