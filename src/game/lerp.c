@@ -12,20 +12,6 @@ static f32 localLerp(f32 current, f32 target, f32 multiplier) {
     return current;
 }
 
-s32 abs_angle_diff_2(s16 x0, s16 x1) {
-    s16 diff = x1 - x0;
-
-    if (diff == -0x8000) {
-        diff = -0x7FFF;
-    }
-
-    if (diff < 0) {
-        diff = -diff;
-    }
-
-    return diff;
-}
-
 void warp_node(struct Object *node) {
     node->header.gfx.bothMats++;
     vec3f_copy(node->header.gfx.posLerp, node->header.gfx.pos);
@@ -33,16 +19,34 @@ void warp_node(struct Object *node) {
     vec3f_copy(node->header.gfx.scaleLerp, node->header.gfx.scale);
 }
 
+s32 absi_lerp(s32 x) {
+    if (x >= 0) {
+        return x;
+    } else {
+        return -x;
+    }
+}
+
+u32 abs_angle_diff_lerp(s16 x0, s16 x1) {
+    return absi_lerp((s16) (x1 - x0));
+}
+
 s32 approach_angle_lerp(s32 current, s32 target) {
-    if ((abs_angle_diff_2(current, target)) >= LERP_THRESHOLD_ANGLE) {
+    s32 diff1;
+    s32 ret;
+    //return target - localLerp((s16) (target - current), 0, gLerpSpeed);
+    if ((diff1 = abs_angle_diff_lerp(current, target)) >= 0x2000) {
         return target;
     }
-
-    s32 move = localLerp((s16) (target - current), 0, gMoveSpeed);
     if (gMoveSpeed == 1) {
-        return (target + move);
+        ret = (target + current) >> 1;
     } else {
-        return (target - move);
+        ret = current - (target - current) >> 1;
+    }
+    if ((diff1 < (absi_lerp(target - current + 0x10000))) && (diff1 < (absi_lerp(target - current - 0x10000)))) {
+        return ret;
+    } else {
+        return ret + 0x8000;
     }
 }
 
