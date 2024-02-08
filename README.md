@@ -1,7 +1,8 @@
 # SM64 Palamedes Engine
 **Developed by: Rovert**
 
-SM64 Palamedes Engine is a fork of HackerSM64 2.1 which adds many additional features for a more refined experience.
+SM64 Palamedes Engine is a fork of HackerSM64 2.1 which adds many additional features which expidites the creation of cutting edge Super Mario 64 ROM hacks.
+
 Features include:
 - Multithreaded 60 FPS
 - Vertex Iterator: Level geometry animation, more information in `quasilight.c`.
