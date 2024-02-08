@@ -1,5 +1,6 @@
 # SM64 Palamedes Engine
 **Developed by: Rovert**
+
 SM64 Palamedes Engine is a fork of HackerSM64 2.1 which adds many additional features for a more refined experience.
 Features include:
 - Multithreaded 60 FPS
@@ -10,6 +11,8 @@ Features include:
 **Palamedes Engine Credits:**
 - **Fazana**: Multithreading implementation from m&m's
 
+
+# HackerSM64 2.1 Information
 HackerSM64 now has a discord server! https://discord.gg/brETAakcXr
 
 This repo requires BOTH a US ROM and a JP ROM in order to build. Place baserom.us.z64 in the repo as usual and ALSO include baserom.jp.z64.
