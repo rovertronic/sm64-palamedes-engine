@@ -1141,6 +1141,7 @@ void level_set_transition(s16 length, void (*updateFunction)()) {
 s32 play_mode_change_area(void) {
     // sm64ex-alo
     // Change function to have similar change_level defines
+
     if (sTransitionUpdate != NULL) {
         sTransitionUpdate(&sTransitionTimer);
     }

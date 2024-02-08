@@ -26,6 +26,8 @@
 #include "debug_box.h"
 #include "engine/colors.h"
 #include "profiling.h"
+#include "quasilight.h"
+#include "main.h"
 #ifdef S2DEX_TEXT_ENGINE
 #include "s2d_engine/init.h"
 #endif
@@ -181,6 +183,9 @@ void load_obj_warp_nodes(void) {
 
 void clear_areas(void) {
     s32 i, j;
+
+    osStopThread(&gQuasilightThread);
+    qsl_point_light_count = 0;
 
     gCurrentArea = NULL;
     gWarpTransition.isActive = FALSE;
