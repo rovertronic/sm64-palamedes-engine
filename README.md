@@ -1,6 +1,14 @@
-# ![](https://i.imgur.com/CeOukzk.gif) HackerSM64 ![](https://i.imgur.com/s0LUbTo.gif)
+# SM64 Palamedes Engine
+**Developed by: Rovert**
+SM64 Palamedes Engine is a fork of HackerSM64 2.1 which adds many additional features for a more refined experience.
+Features include:
+- Multithreaded 60 FPS
+- Vertex Iterator: Level geometry animation, more information in `quasilight.c`.
+- Lighting Engine: Point lights, plane lights, and sunlight.
+- Advanced Shadows: Projected shadows, more information in `edging_shadow.c`.
 
-**AFTER CLONING THE REPO, CHECK OUT THE `include/config` FOLDER BEFORE ANYTHING ELSE! THERE'S A LOT OF STUFF IN THIS REPO THAT CAN BE TOGGLED THERE.**
+**Palamedes Engine Credits:**
+- **Fazana**: Multithreading implementation from m&m's
 
 HackerSM64 now has a discord server! https://discord.gg/brETAakcXr
 
