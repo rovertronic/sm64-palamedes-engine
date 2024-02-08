@@ -65,7 +65,7 @@ void qsl_remove_pl(int id) {
 }
 
 point_light * qsl_pl_nearest(Vec3f position) {
-    f32 smallest_dist = 9999.0f;
+    f32 smallest_dist = 99999.0f;
     point_light * nearest_pl = NULL;
 
     for(int i=0; i<qsl_point_light_count; i++) {
