@@ -15,6 +15,7 @@
 #include "graph_node.h"
 #include "surface_collision.h"
 #include "game/puppylights.h"
+#include "game/level_update.h"
 
 // Macros for retrieving arguments from behavior scripts.
 #define BHV_CMD_GET_1ST_U8(index)  (u8)((gCurBhvCommand[index] >> 24) & 0xFF) // unused
@@ -45,6 +46,11 @@ void obj_update_gfx_pos_and_angle(struct Object *obj) {
 
     if (obj->pl) {
         vec3f_copy(obj->pl->position, &obj->header.gfx.posLerp);
+        if (obj->oHeldState == HELD_HELD) {
+            //vec3f_copy(obj->pl->position, gMarioState->marioBodyState->heldObjLastPosition);
+        } else {
+            //vec3f_copy(obj->pl->position, &obj->header.gfx.posLerp);
+        }
     }
 }
 

@@ -226,7 +226,7 @@ void bhv_homing_amp_loop(void) {
  */
 void bhv_circling_amp_init(void) {
     color_u8 lightcolor = {255,255,0};
-    o->pl = qsl_create_pl(&o->oPosVec,lightcolor,20.0f);
+    o->pl = qsl_create_pl(&o->oPosVec,lightcolor,5.0f,o);
 
     vec3f_copy(&o->oHomeVec, &o->oPosVec);
     o->oAnimState = 1;

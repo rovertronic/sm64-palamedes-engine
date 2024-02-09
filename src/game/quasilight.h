@@ -32,9 +32,10 @@ typedef struct {
     color_u8 color;
     Vec3f position;
     int id;
+    struct Object *obj;
 } point_light;
 
-point_light * qsl_create_pl(Vec3f position, color_u8 color, f32 brightness);
+point_light * qsl_create_pl(Vec3f position, color_u8 color, f32 brightness,  struct Object * obj);
 void qsl_remove_pl(int id);
 
 vector_s8 qsl_pl_direction(Vec3f position, point_light * pl);

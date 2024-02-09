@@ -29,7 +29,7 @@ void bhv_collect_star_init(void) {
     obj_set_hitbox(o, &sCollectStarHitbox);
 
     color_u8 lightcolor = {255,255,0};
-    o->pl = qsl_create_pl(&o->oPosVec,lightcolor,6.0f);
+    o->pl = qsl_create_pl(&o->oPosVec,lightcolor,6.0f,o);
 }
 
 void bhv_collect_star_loop(void) {

@@ -6,6 +6,8 @@
 #include "level_update.h"
 #include "area.h"
 #include "camera.h"
+#include "buffers/buffers.h"
+#include "audio/external.h"
 
 #include "levels/test/header.h"
 
@@ -33,8 +35,8 @@ int qsl_dl_count = 0;
 u8 qsl_dl_flagged = FALSE;
 
 Vec3f qsl_global_sun_direction = {0.0f, 1.0f, 0.0f};
-color_u8 qsl_global_sun_color = {60,60,60};//{90/2, 95/2, 100/2};
-color_u8 qsl_global_ambient_color = {60,60,60};//{50/2, 45/2, 50/2};
+color_u8 qsl_global_sun_color = {40,40,40};//{90/2, 95/2, 100/2};
+color_u8 qsl_global_ambient_color = {40,40,40};//{50/2, 45/2, 50/2};
 
 vector_s8 vec3f_to_vector_s8(Vec3f vector) {
     vector_s8 returnvec;
@@ -45,11 +47,12 @@ vector_s8 vec3f_to_vector_s8(Vec3f vector) {
     return returnvec;
 }
 
-point_light * qsl_create_pl(Vec3f position, color_u8 color, f32 brightness) {
+point_light * qsl_create_pl(Vec3f position, color_u8 color, f32 brightness, struct Object * obj) {
     vec3f_copy(qsl_point_light_pool[qsl_point_light_count].position,position);
     qsl_point_light_pool[qsl_point_light_count].color = color;
     qsl_point_light_pool[qsl_point_light_count].brightness = brightness;
     qsl_point_light_pool[qsl_point_light_count].id = qsl_point_light_count;
+    qsl_point_light_pool[qsl_point_light_count].obj = obj;
     qsl_point_light_count++;
     return &qsl_point_light_pool[qsl_point_light_count-1];
 }
@@ -58,6 +61,9 @@ void qsl_remove_pl(int id) {
     qsl_point_light_count--;
 
     for (int i=id; i<qsl_point_light_count+1; i++) {
+        if (qsl_point_light_pool[i+1].obj) {
+            qsl_point_light_pool[i+1].obj->pl = &qsl_point_light_pool[i];
+        }
         bcopy(&qsl_point_light_pool[i+1],&qsl_point_light_pool[i],sizeof(qsl_point_light_pool[0]));
         //qsl_point_light_pool[i].id = id;
     }
@@ -208,7 +214,7 @@ void qsl_update_vtx_list_camera_alpha(Vtx * terrain, int size) {
 }
 
 void qsl_update_vertex_iterator_thread10(void) {
-    u32 * command_read = segmented_to_virtual(mat_test_dl_f3dlite_material);
+    u32 * command_read;
     int qsl_gfx_stack_level = 0;
     u8 end_of_list = FALSE;
     qsl_vertex_index = 0;
@@ -218,11 +224,13 @@ void qsl_update_vertex_iterator_thread10(void) {
 
     Vec3f zeroo = {0,0,0};
     color_u8 col = {255,255,255};
-    qsl_create_pl(zeroo,col,4.0f);
+    qsl_create_pl(zeroo,col,4.0f,NULL);
 
     Vec3f plac = {700,0,0};
     color_u8 col2 = {255,0,0};
-    qsl_create_pl(plac,col2,4.0f);
+    qsl_create_pl(plac,col2,4.0f,NULL);
+
+    play_sound(SOUND_MENU_STAR_SOUND, gGlobalSoundSource);
 
     while (TRUE) {
 
@@ -339,6 +347,8 @@ void qsl_add_dl_to_iterator(Gfx * dl_to_add, void (*func_to_add)(Vtx * terrain, 
 
 void qsl_reset(void) {
     osStopThread(&gQuasilightThread);
+    osDestroyThread(&gQuasilightThread);
+    create_thread(&gQuasilightThread, THREAD_10_QUASILIGHT, qsl_update_vertex_iterator_thread10, NULL, gThread10Stack + THREAD10_STACK, 1);
     qsl_point_light_count = 0;
     if (qsl_dl_count > 0) {
         //SM64's memory allocation system is stack based, so this will effectively clear out everything allocated
@@ -363,6 +373,7 @@ Gfx *geo_object_calculate_light(s32 callContext, struct GraphNode *node, Mat4 *m
         Lights3 *dir_light = alloc_display_list(sizeof(*dir_light));
 
         point_light * pl = qsl_pl_nearest(object_pos);
+        if (pl==NULL) {return NULL;}
         vector_s8 point_dir = qsl_pl_direction(object_pos, pl);
         color_u8 point_col = qsl_pl_color(object_pos, pl);
 

@@ -211,7 +211,9 @@ void obj_orient_graph(struct Object *obj, f32 normalX, f32 normalY, f32 normalZ)
     vec3f_set(surfaceNormals, normalX, normalY, normalZ);
 
     mtxf_align_terrain_normal(*throwMatrix, surfaceNormals, objVisualPosition, obj->oFaceAngleYaw);
-    obj->header.gfx.throwMatrix = throwMatrix;
+    //obj->header.gfx.throwMatrix = throwMatrix;
+    obj->header.gfx.useManualMatrix = TRUE;
+    mtxf_copy(&obj->header.gfx.manualMatrix,throwMatrix);
 }
 
 /**
