@@ -85,6 +85,11 @@ void bhv_temp_coin_loop(void) {
 }
 
 void bhv_coin_init(void) {
+    if (cur_obj_has_model(MODEL_BLUE_COIN)) {
+        color_u8 lightcolor = {100,100,255};
+        o->pl = qsl_create_pl(&o->oPosVec,lightcolor,5.0f,o);
+    }
+
     o->oVelY = random_float() * 10.0f + 30 + o->oCoinBaseYVel;
     o->oForwardVel = random_float() * 10.0f;
     o->oMoveAngleYaw = random_u16();
