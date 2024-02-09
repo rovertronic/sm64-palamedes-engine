@@ -93,6 +93,33 @@ s32 count_edging_shadow_vtx(s32 x, s32 y, s32 z) {
             surf = node->surface;
             node = node->next;
 
+            // Skip triangle if there's going to be UV overflow
+            s32 test;
+            test = (surf->vertex1[0]-x)*7+512;
+            if ((test > 32767) || (test < -32767)) {
+                continue;
+            }
+            test = (surf->vertex2[0]-x)*7+512;
+            if ((test > 32767) || (test < -32767)) {
+                continue;
+            }
+            test = (surf->vertex3[0]-x)*7+512;
+            if ((test > 32767) || (test < -32767)) {
+                continue;
+            }
+            test = (surf->vertex1[2]-z)*7+512;
+            if ((test > 32767) || (test < -32767)) {
+                continue;
+            }
+            test = (surf->vertex2[2]-z)*7+512;
+            if ((test > 32767) || (test < -32767)) {
+                continue;
+            }
+            test = (surf->vertex3[2]-z)*7+512;
+            if ((test > 32767) || (test < -32767)) {
+                continue;
+            }
+
             s32 y1 = surf->vertex1[1];
             s32 y2 = surf->vertex2[1];
             s32 y3 = surf->vertex3[1];
@@ -115,33 +142,6 @@ s32 count_edging_shadow_vtx(s32 x, s32 y, s32 z) {
                 case 3:
                     // Floor cutoff
                     if (y < surf->lowerY) {
-                        continue;
-                    }
-
-                    // Skip triangle if there's going to be UV overflow
-                    s32 test;
-                    test = (surf->vertex1[0]-x)*7+512;
-                    if ((test > 32767) || (test < -32767)) {
-                        continue;
-                    }
-                    test = (surf->vertex2[0]-x)*7+512;
-                    if ((test > 32767) || (test < -32767)) {
-                        continue;
-                    }
-                    test = (surf->vertex3[0]-x)*7+512;
-                    if ((test > 32767) || (test < -32767)) {
-                        continue;
-                    }
-                    test = (surf->vertex1[2]-z)*7+512;
-                    if ((test > 32767) || (test < -32767)) {
-                        continue;
-                    }
-                    test = (surf->vertex2[2]-z)*7+512;
-                    if ((test > 32767) || (test < -32767)) {
-                        continue;
-                    }
-                    test = (surf->vertex3[2]-z)*7+512;
-                    if ((test > 32767) || (test < -32767)) {
                         continue;
                     }
                     break;
@@ -174,6 +174,33 @@ void generate_edging_shadow_vtx(s32 x, s32 y, s32 z, Vtx *verts) {
             surf = node->surface;
             node = node->next;
 
+            // Skip triangle if there's going to be UV overflow
+            s32 test;
+            test = (surf->vertex1[0]-x)*7+512;
+            if ((test > 32767) || (test < -32767)) {
+                continue;
+            }
+            test = (surf->vertex2[0]-x)*7+512;
+            if ((test > 32767) || (test < -32767)) {
+                continue;
+            }
+            test = (surf->vertex3[0]-x)*7+512;
+            if ((test > 32767) || (test < -32767)) {
+                continue;
+            }
+            test = (surf->vertex1[2]-z)*7+512;
+            if ((test > 32767) || (test < -32767)) {
+                continue;
+            }
+            test = (surf->vertex2[2]-z)*7+512;
+            if ((test > 32767) || (test < -32767)) {
+                continue;
+            }
+            test = (surf->vertex3[2]-z)*7+512;
+            if ((test > 32767) || (test < -32767)) {
+                continue;
+            }
+
             s32 y1 = surf->vertex1[1];
             s32 y2 = surf->vertex2[1];
             s32 y3 = surf->vertex3[1];
@@ -198,34 +225,6 @@ void generate_edging_shadow_vtx(s32 x, s32 y, s32 z, Vtx *verts) {
                     if (y < surf->lowerY) {
                         continue;
                     }
-
-                    // Skip triangle if there's going to be UV overflow
-                    s32 test;
-                    test = (surf->vertex1[0]-x)*7+512;
-                    if ((test > 32767) || (test < -32767)) {
-                        continue;
-                    }
-                    test = (surf->vertex2[0]-x)*7+512;
-                    if ((test > 32767) || (test < -32767)) {
-                        continue;
-                    }
-                    test = (surf->vertex3[0]-x)*7+512;
-                    if ((test > 32767) || (test < -32767)) {
-                        continue;
-                    }
-                    test = (surf->vertex1[2]-z)*7+512;
-                    if ((test > 32767) || (test < -32767)) {
-                        continue;
-                    }
-                    test = (surf->vertex2[2]-z)*7+512;
-                    if ((test > 32767) || (test < -32767)) {
-                        continue;
-                    }
-                    test = (surf->vertex3[2]-z)*7+512;
-                    if ((test > 32767) || (test < -32767)) {
-                        continue;
-                    }
-                    break;
             }
                                                                                                             // UV PROJECTION
             make_vertex(verts, (edging_shadow_vtx_count + 0), surf->vertex1[0], y1, surf->vertex1[2], (surf->vertex1[0]-x)*7+512, (surf->vertex1[2]-z)*7+512, 0xFF, 0xFF, 0xFF, 0xFF);
