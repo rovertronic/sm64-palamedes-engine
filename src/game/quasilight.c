@@ -51,22 +51,23 @@ point_light * qsl_create_pl(Vec3f position, color_u8 color, f32 brightness, stru
     vec3f_copy(qsl_point_light_pool[qsl_point_light_count].position,position);
     qsl_point_light_pool[qsl_point_light_count].color = color;
     qsl_point_light_pool[qsl_point_light_count].brightness = brightness;
-    qsl_point_light_pool[qsl_point_light_count].id = qsl_point_light_count;
     qsl_point_light_pool[qsl_point_light_count].obj = obj;
     qsl_point_light_count++;
     return &qsl_point_light_pool[qsl_point_light_count-1];
 }
 
-void qsl_remove_pl(int id) {
-    qsl_point_light_count--;
-
-    for (int i=id; i<qsl_point_light_count+1; i++) {
-        if (qsl_point_light_pool[i+1].obj) {
-            qsl_point_light_pool[i+1].obj->pl = &qsl_point_light_pool[i];
+void qsl_remove_pl(struct Object * obj) {
+    for (int i=0; i<qsl_point_light_count; i++) {
+        if (qsl_point_light_pool[i].obj == obj) {
+            for (int j=i; j<qsl_point_light_count; j++) {
+                bcopy(&qsl_point_light_pool[j+1],&qsl_point_light_pool[j],sizeof(qsl_point_light_pool[0]));
+                if (qsl_point_light_pool[j].obj) {
+                    qsl_point_light_pool[j].obj->pl = &qsl_point_light_pool[j];
+                }
+            }
+            qsl_point_light_count--;
+            return;
         }
-        qsl_point_light_pool[i+1].id = qsl_point_light_pool[i].id;
-        bcopy(&qsl_point_light_pool[i+1],&qsl_point_light_pool[i],sizeof(qsl_point_light_pool[0]));
-        //qsl_point_light_pool[i].id = id;
     }
 }
 
@@ -359,87 +360,6 @@ void qsl_reset(void) {
     }
 }
 
-/* GEO ASMs
-All these functions apply to whatever model / object you put them on.
-*/
-
-/* Put this on any object in which you'd like it to recieve point lights and sunlight.*/
-/*
-Gfx *geo_object_calculate_light(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
-    return NULL;
-    if (callContext == GEO_CONTEXT_RENDER) {
-        if (qsl_point_light_count==0) {return NULL;}
-
-        Vec3f object_pos = {(*mtx)[3][0], (*mtx)[3][1], (*mtx)[3][2]};
-
-        Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*8);
-        Lights3 *dir_light = alloc_display_list(sizeof(*dir_light));
-
-        point_light * pl = qsl_pl_nearest(object_pos);
-        if (pl==NULL) {return NULL;}
-        vector_s8 point_dir = qsl_pl_direction(object_pos, pl);
-        color_u8 point_col = qsl_pl_color(object_pos, pl);
-
-        color_u8 amb = qsl_ambient_color(object_pos);
-        vector_s8 sun_dir = qsl_sun_direction(object_pos);
-        color_u8 sun_col = qsl_sun_color(object_pos);
-
-        color_u8 plane_col = qsl_plane_color(object_pos);
-
-        dir_light->a.l.col[0] =  amb.r;
-        dir_light->a.l.col[1] =  amb.g;
-        dir_light->a.l.col[2] =  amb.b;
-        dir_light->a.l.colc[0] = amb.r;
-        dir_light->a.l.colc[1] = amb.g;
-        dir_light->a.l.colc[2] = amb.b;
-
-        dir_light->l[0].l.dir[0]  = point_dir.x;
-        dir_light->l[0].l.dir[1]  = point_dir.y;
-        dir_light->l[0].l.dir[2]  = point_dir.z;
-        dir_light->l[0].l.col[0]  = point_col.r;
-        dir_light->l[0].l.col[1]  = point_col.g;
-        dir_light->l[0].l.col[2]  = point_col.b;
-        dir_light->l[0].l.colc[0] = point_col.r;
-        dir_light->l[0].l.colc[1] = point_col.g;
-        dir_light->l[0].l.colc[2] = point_col.b;
-
-        dir_light->l[1].l.dir[0]  = sun_dir.x;
-        dir_light->l[1].l.dir[1]  = sun_dir.y;
-        dir_light->l[1].l.dir[2]  = sun_dir.z;
-        dir_light->l[1].l.col[0]  = sun_col.r;
-        dir_light->l[1].l.col[1]  = sun_col.g;
-        dir_light->l[1].l.col[2]  = sun_col.b;
-        dir_light->l[1].l.colc[0] = sun_col.r;
-        dir_light->l[1].l.colc[1] = sun_col.g;
-        dir_light->l[1].l.colc[2] = sun_col.b;
-
-        dir_light->l[2].l.dir[0]  = 0;
-        dir_light->l[2].l.dir[1]  = -127;
-        dir_light->l[2].l.dir[2]  = 0;
-        dir_light->l[2].l.col[0]  = plane_col.r;
-        dir_light->l[2].l.col[1]  = plane_col.g;
-        dir_light->l[2].l.col[2]  = plane_col.b;
-        dir_light->l[2].l.colc[0] = plane_col.r;
-        dir_light->l[2].l.colc[1] = plane_col.g;
-        dir_light->l[2].l.colc[2] = plane_col.b;
-
-
-        gSPSetGeometryMode(&gfxlist[0], G_LIGHTING);
-        gSPNumLights(&gfxlist[1],NUMLIGHTS_3);
-        gSPLight(&gfxlist[2],&(*dir_light).l[0],1);	
-        gSPLight(&gfxlist[3],&(*dir_light).l[1],2);
-        gSPLight(&gfxlist[4],&(*dir_light).l[2],3);
-        gSPLight(&gfxlist[5],&(*dir_light).a,4);
-        gSPEndDisplayList(&gfxlist[6]);
-
-        geo_append_display_list(gfxlist, LAYER_OPAQUE);
-        geo_append_display_list(gfxlist, LAYER_ALPHA);
-    }
-
-    return NULL;
-}
-*/
-
 void qsl_process_object_light(Vec3f pos, struct Object * obj) {
     if (qsl_point_light_count==0) {return NULL;}
 
@@ -513,6 +433,9 @@ void qsl_process_object_light(Vec3f pos, struct Object * obj) {
     geo_append_display_list(gfxlist, LAYER_TRANSPARENT);
 }
 
+/* GEO ASMs
+All these functions apply to whatever model / object you put them on.
+*/
 Gfx *geo_terrain_use_global_light(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
     if (callContext == GEO_CONTEXT_RENDER) {
         Vec3f object_pos = {0.0f,0.0,0.0f};

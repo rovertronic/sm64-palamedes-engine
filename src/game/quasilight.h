@@ -31,12 +31,11 @@ typedef struct {
     f32 brightness;
     color_u8 color;
     Vec3f position;
-    int id;
     struct Object *obj;
 } point_light;
 
 point_light * qsl_create_pl(Vec3f position, color_u8 color, f32 brightness,  struct Object * obj);
-void qsl_remove_pl(int id);
+void qsl_remove_pl(struct Object * obj);
 
 vector_s8 qsl_pl_direction(Vec3f position, point_light * pl);
 color_u8 qsl_pl_color(Vec3f position, point_light * pl);
@@ -49,7 +48,6 @@ color_u8 qsl_sun_color(Vec3f position);
 void qsl_update_vertex_iterator_thread10(void);
 void qsl_reset(void);
 
-//Gfx *geo_object_calculate_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_use_point_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_wiggle(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_use_global_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);

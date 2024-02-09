@@ -393,7 +393,7 @@ s32 unload_deactivated_objects_in_list(struct ObjectNode *objList) {
             }
 
             if (gCurrentObject->pl) {
-                qsl_remove_pl(gCurrentObject->pl->id);
+                qsl_remove_pl(gCurrentObject);
                 gCurrentObject->pl = NULL;
             }
 

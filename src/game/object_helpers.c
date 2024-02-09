@@ -887,7 +887,7 @@ void obj_mark_for_deletion(struct Object *obj) {
     //  so this is worth looking into.
     //! NOTE: Changing this can cause reference issues!
     if (obj->pl) {
-        qsl_remove_pl(obj->pl->id);
+        qsl_remove_pl(obj);
         obj->pl = NULL;
     }
 

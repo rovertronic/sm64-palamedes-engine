@@ -116,6 +116,33 @@ void generate_edging_shadow_vtx(s32 x, s32 y, s32 z, Vtx *verts) {
                     if (y < surf->lowerY) {
                         continue;
                     }
+
+                    // Skip triangle if there's going to be UV overflow
+                    s32 test;
+                    test = (surf->vertex1[0]-x)*7+512;
+                    if ((test > 32767) || (test < -32767)) {
+                        continue;
+                    }
+                    test = (surf->vertex2[0]-x)*7+512;
+                    if ((test > 32767) || (test < -32767)) {
+                        continue;
+                    }
+                    test = (surf->vertex3[0]-x)*7+512;
+                    if ((test > 32767) || (test < -32767)) {
+                        continue;
+                    }
+                    test = (surf->vertex1[2]-z)*7+512;
+                    if ((test > 32767) || (test < -32767)) {
+                        continue;
+                    }
+                    test = (surf->vertex2[2]-z)*7+512;
+                    if ((test > 32767) || (test < -32767)) {
+                        continue;
+                    }
+                    test = (surf->vertex3[2]-z)*7+512;
+                    if ((test > 32767) || (test < -32767)) {
+                        continue;
+                    }
                     break;
             }
                                                                                                             // UV PROJECTION
