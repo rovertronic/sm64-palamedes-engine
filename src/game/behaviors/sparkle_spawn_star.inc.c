@@ -13,6 +13,9 @@ struct ObjectHitbox sSparkleSpawnStarHitbox = {
 };
 
 void bhv_spawned_star_init(void) {
+    color_u8 lightcolor = {255,255,0};
+    o->pl = qsl_create_pl(&o->oPosVec,lightcolor,6.0f,o);
+
     if (!(o->oInteractionSubtype & INT_SUBTYPE_NO_EXIT)) {
         o->oBehParams = o->parentObj->oBehParams;
     }

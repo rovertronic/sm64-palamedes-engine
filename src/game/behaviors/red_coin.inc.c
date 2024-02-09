@@ -24,6 +24,8 @@ static struct ObjectHitbox sRedCoinHitbox = {
  * Red coin initialization function. Sets the coin's hitbox and parent object.
  */
 void bhv_red_coin_init(void) {
+    color_u8 lightcolor = {255,0,0};
+    o->pl = qsl_create_pl(&o->oPosVec,lightcolor,4.0f,o);
     // Set the red coins to have a parent of the closest red coin star.
     struct Object *hiddenRedCoinStar = cur_obj_nearest_object_with_behavior(bhvHiddenRedCoinStar);
     if (hiddenRedCoinStar != NULL) {

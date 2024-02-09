@@ -2,7 +2,7 @@
 const GeoLayout goomba_geo[] = {
    GEO_SHADOW(SHADOW_CIRCLE_4_VERTS, 0x96, 100),
    GEO_OPEN_NODE(),
-      GEO_ASM(0, geo_object_calculate_light),
+      //GEO_ASM(0, geo_object_calculate_light),
       GEO_SCALE(0x00, 16384),
       GEO_OPEN_NODE(),
          GEO_ANIMATED_PART(LAYER_OPAQUE, 0, 0, 0, goomba_seg8_dl_0801D760),

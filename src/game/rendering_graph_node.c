@@ -1297,6 +1297,7 @@ void geo_process_object(struct Object *node) {
             mtxf_translate(gMatStack[gMatStackIndex + 1], node->header.gfx.posLerp);
         }
         else{
+            qsl_process_object_light(node->header.gfx.posLerp, node);
             if (!noThrowMatrix) {
                 mtxf_scale_vec3f(gMatStack[gMatStackIndex + 1], *node->header.gfx.throwMatrix, node->header.gfx.scaleLerp);
                 gMatStack[gMatStackIndex + 1][3][0] = node->header.gfx.posLerp[0];

@@ -4,11 +4,20 @@ void bhv_explosion_init(void) {
     create_sound_spawner(SOUND_GENERAL2_BOBOMB_EXPLOSION);
     set_environmental_camera_shake(SHAKE_ENV_EXPLOSION);
 
+    color_u8 lightcolor = {255,200,105};
+    o->pl = qsl_create_pl(&o->oPosVec,lightcolor,8.0f,o);
+
     o->oOpacity = 255;
 }
 
 void bhv_explosion_loop(void) {
     s32 i;
+
+    if (o->pl) {
+        o->pl->color.r = 255-((o->oTimer/9.0f)*255.0f);
+        o->pl->color.g = 150-((o->oTimer/9.0f)*150.0f);
+        o->pl->color.b = 100-((o->oTimer/9.0f)*100.0f);
+    }
 
     if (o->oTimer == 9) {
         if (find_water_level(o->oPosX, o->oPosZ) > o->oPosY) {

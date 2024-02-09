@@ -133,7 +133,7 @@ void render_edging_shadow(void) {
      || !gMarioState->marioObj) {
         return;
     }
-    Vtx *verts = alloc_display_list(0x4000);
+    Vtx *verts = alloc_display_list(0x2000);
 
     //figure this shit out later
     //(iterate_surface_count(gMarioState->marioObj->header.gfx.posLerp[0], gMarioState->marioObj->header.gfx.posLerp[2]) * 3) * sizeof(Vtx)

@@ -2670,8 +2670,10 @@ typedef union {
 	gMoveWd(pkt, G_MW_LIGHTCOL, G_MWO_b##n, col);			\
 }
 #define gsSPLightColor(n, col)						\
-	gsMoveWd(G_MW_LIGHTCOL, G_MWO_a##n, col),			\
-	gsMoveWd(G_MW_LIGHTCOL, G_MWO_b##n, col)
+	gsSPNoOp()
+	//gsMoveWd(G_MW_LIGHTCOL, G_MWO_a##n, col),			
+	//gsMoveWd(G_MW_LIGHTCOL, G_MWO_b##n, col)
+
 
 /* These macros use a structure "name" which is init'd with the gdSPDefLights macros*/
 

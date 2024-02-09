@@ -93,6 +93,9 @@ void water_bomb_spawn_explode_particles(s8 offsetY, s8 forwardVelRange, s8 velYB
 static void water_bomb_act_init(void) {
     cur_obj_play_sound_2(SOUND_OBJ_SOMETHING_LANDING);
 
+    color_u8 lightcolor = {100,100,255};
+    o->pl = qsl_create_pl(&o->oPosVec,lightcolor,5.0f,o);
+
     o->oAction = WATER_BOMB_ACT_DROP;
     o->oMoveFlags = OBJ_MOVE_NONE;
     o->oVelY = -40.0f;

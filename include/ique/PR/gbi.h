@@ -2646,6 +2646,7 @@ typedef union {
 	gMoveWd(pkt, G_MW_LIGHTCOL, G_MWO_b##n, col);			\
 }
 #define gsSPLightColor(n, col)						\
+
 	gsMoveWd(G_MW_LIGHTCOL, G_MWO_a##n, col),			\
 	gsMoveWd(G_MW_LIGHTCOL, G_MWO_b##n, col)
 

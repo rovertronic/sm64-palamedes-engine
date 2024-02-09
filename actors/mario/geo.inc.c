@@ -1809,7 +1809,7 @@ const GeoLayout mario_geo_render_body[] = {
 const GeoLayout mario_geo[] = {
    GEO_SHADOW(SHADOW_CIRCLE_PLAYER, 0xB4, 100),
    GEO_OPEN_NODE(),
-      GEO_ASM(0, geo_object_calculate_light),
+      //GEO_ASM(0, geo_object_calculate_light),
       GEO_SCALE(0x00, 16384),
       GEO_OPEN_NODE(),
          GEO_ASM(0, geo_mirror_mario_backface_culling),
