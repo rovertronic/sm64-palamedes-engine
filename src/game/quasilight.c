@@ -140,8 +140,31 @@ color_u8 qsl_plane_color(Vec3f position) {
     return plane_color;
 }
 
+/*
 color_u8 qsl_color_env(Vec3f position, Vec3f point_normal, point_light * pl) {
-    f32 sun_coverage = (1.0f + vec3f_dot(point_normal,qsl_global_sun_direction))/2.0f;
+    f32 sun_coverage = CLAMP_0(vec3f_dot(point_normal,qsl_global_sun_direction));
+    color_u8 sun_color = qsl_sun_color(position);
+
+    color_u8 ambient = qsl_ambient_color(position);
+
+    f32 brightness = pl->brightness;
+    color_u8 point_col = pl->color;
+    Vec3f transformed_light;
+    vec3f_diff(transformed_light, pl->position, position);
+    f32 dist = vec3_mag(transformed_light);
+    vec3f_normalize(transformed_light);
+    f32 surf_coverage = CLAMP_0(vec3f_dot(point_normal,transformed_light));
+
+    color_u8 light_here;
+    light_here.r = CLAMP_255(ambient.r + (sun_coverage*sun_color.r) + CLAMP_0(255 - (dist/brightness))*surf_coverage*(point_col.r/127.0f) );
+    light_here.g = CLAMP_255(ambient.g + (sun_coverage*sun_color.g) + CLAMP_0(255 - (dist/brightness))*surf_coverage*(point_col.g/127.0f) );
+    light_here.b = CLAMP_255(ambient.b + (sun_coverage*sun_color.b) + CLAMP_0(255 - (dist/brightness))*surf_coverage*(point_col.b/127.0f) );
+    return light_here;
+}
+*/
+
+color_u8 qsl_color_env(Vec3f position, Vec3f point_normal, point_light * pl) {
+    f32 sun_coverage = CLAMP_0(vec3f_dot(point_normal,qsl_global_sun_direction));
     color_u8 sun_color = qsl_sun_color(position);
 
     color_u8 ambient = qsl_ambient_color(position);
