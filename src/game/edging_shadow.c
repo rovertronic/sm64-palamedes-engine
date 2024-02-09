@@ -71,6 +71,88 @@ void visual_surface_display_size(Vtx *verts, s32 size) {
     }
 }
 
+s32 count_edging_shadow_vtx(s32 x, s32 y, s32 z) {
+    struct SurfaceNode *node;
+    struct Surface *surf;
+    s32 ct = 0;
+
+    if (is_outside_level_bounds(x, z)) return;
+
+    s32 cellX = GET_CELL_COORD(x);
+    s32 cellZ = GET_CELL_COORD(z);
+
+    for (u8 i = 0; i < 4; i++) {
+        switch (i) {
+            case 0: node = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS ].next; break;
+            case 1: node =  gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS ].next; break;
+            case 2: node = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS].next; break;
+            case 3: node =  gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS].next; break;
+        }
+
+        while (node != NULL) {
+            surf = node->surface;
+            node = node->next;
+
+            s32 y1 = surf->vertex1[1];
+            s32 y2 = surf->vertex2[1];
+            s32 y3 = surf->vertex3[1];
+
+            switch (i) {
+                case 0:
+                case 1:
+                    // Wall cutoff
+                    if (y1 > y) {
+                        y1 = y;
+                    }
+                    if (y2 > y) {
+                        y2 = y;
+                    }
+                    if (y3 > y) {
+                        y3 = y;
+                    }
+                    break;
+                case 2:
+                case 3:
+                    // Floor cutoff
+                    if (y < surf->lowerY) {
+                        continue;
+                    }
+
+                    // Skip triangle if there's going to be UV overflow
+                    s32 test;
+                    test = (surf->vertex1[0]-x)*7+512;
+                    if ((test > 32767) || (test < -32767)) {
+                        continue;
+                    }
+                    test = (surf->vertex2[0]-x)*7+512;
+                    if ((test > 32767) || (test < -32767)) {
+                        continue;
+                    }
+                    test = (surf->vertex3[0]-x)*7+512;
+                    if ((test > 32767) || (test < -32767)) {
+                        continue;
+                    }
+                    test = (surf->vertex1[2]-z)*7+512;
+                    if ((test > 32767) || (test < -32767)) {
+                        continue;
+                    }
+                    test = (surf->vertex2[2]-z)*7+512;
+                    if ((test > 32767) || (test < -32767)) {
+                        continue;
+                    }
+                    test = (surf->vertex3[2]-z)*7+512;
+                    if ((test > 32767) || (test < -32767)) {
+                        continue;
+                    }
+                    break;
+            }
+
+            ct += 3;
+        }
+    }
+    return ct;
+}
+
 void generate_edging_shadow_vtx(s32 x, s32 y, s32 z, Vtx *verts) {
     struct SurfaceNode *node;
     struct Surface *surf;
@@ -160,10 +242,12 @@ void render_edging_shadow(void) {
      || !gMarioState->marioObj) {
         return;
     }
-    Vtx *verts = alloc_display_list(0x2000);
 
-    //figure this shit out later
-    //(iterate_surface_count(gMarioState->marioObj->header.gfx.posLerp[0], gMarioState->marioObj->header.gfx.posLerp[2]) * 3) * sizeof(Vtx)
+    f32 x = gMarioState->marioObj->header.gfx.posLerp[0];
+    f32 y = gMarioState->marioObj->header.gfx.posLerp[1]+50;
+    f32 z = gMarioState->marioObj->header.gfx.posLerp[2];
+
+    Vtx *verts = alloc_display_list( sizeof(Vtx) * count_edging_shadow_vtx(x,y,z) );
 
     if (verts == NULL) {
         return;
@@ -174,7 +258,7 @@ void render_edging_shadow(void) {
     gSPDisplayList(gDisplayListHead++, dl_edging_shadow_start);
     gSPDisplayList(gDisplayListHead++, dl_super_shadow);
     gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, 200);
-    generate_edging_shadow_vtx(gMarioState->marioObj->header.gfx.posLerp[0], gMarioState->marioObj->header.gfx.posLerp[1]+50, gMarioState->marioObj->header.gfx.posLerp[2], verts);
+    generate_edging_shadow_vtx(x,y,z, verts);
     visual_surface_display_size(verts, edging_shadow_vtx_count);
     gSPDisplayList(gDisplayListHead++, dl_edging_shadow_end);
 }
