@@ -30,6 +30,7 @@
 #include "game/puppyprint.h"
 #include "game/puppylights.h"
 #include "game/emutest.h"
+#include "game/quasilight.h"
 
 #include "config.h"
 
@@ -916,6 +917,18 @@ static void level_cmd_set_echo(void) {
     sCurrentCmd = CMD_NEXT;
 }
 
+static void level_cmd_light_plane(void) {
+    sCurrentCmd = CMD_NEXT;
+}
+
+static void level_cmd_point_light(void) {
+    Vec3f light_pos = {CMD_GET(s16, 8),CMD_GET(s16, 10),CMD_GET(s16, 12)};
+    color_u8 light_color = {CMD_GET(u8, 4),CMD_GET(u8, 5),CMD_GET(u8, 6)};
+    f32 light_strength = CMD_GET(u8, 7);
+    qsl_create_pl(light_pos, light_color, light_strength, NULL);
+    sCurrentCmd = CMD_NEXT;
+}
+
 static void (*LevelScriptJumpTable[])(void) = {
     /*LEVEL_CMD_LOAD_AND_EXECUTE            */ level_cmd_load_and_execute,
     /*LEVEL_CMD_EXIT_AND_EXECUTE            */ level_cmd_exit_and_execute,
@@ -983,6 +996,8 @@ static void (*LevelScriptJumpTable[])(void) = {
     /*LEVEL_CMD_PUPPYLIGHT_ENVIRONMENT      */ level_cmd_puppylight_environment,
     /*LEVEL_CMD_PUPPYLIGHT_NODE             */ level_cmd_puppylight_node,
     /*LEVEL_CMD_SET_ECHO                    */ level_cmd_set_echo,
+    /*LEVEL_CMD_LIGHT_PLANE                 */ level_cmd_light_plane,
+    /*LEVEL_CMD_POINT_LIGHT                 */ level_cmd_point_light,
 };
 
 struct LevelCommand *level_script_execute(struct LevelCommand *cmd) {
