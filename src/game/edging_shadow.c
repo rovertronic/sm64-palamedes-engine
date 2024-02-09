@@ -32,7 +32,6 @@ static Gfx dl_edging_shadow_end[] = {
 };
 
 extern Gfx dl_super_shadow[];
-Vtx cumpooplist[0x4000];
 s32 edging_shadow_vtx_count;
 
 #define VERTCOUNT 12
@@ -134,7 +133,10 @@ void render_edging_shadow(void) {
      || !gMarioState->marioObj) {
         return;
     }
-    Vtx *verts = cumpooplist;//alloc_display_list((iterate_surface_count(gMarioState->pos[0], gMarioState->pos[2]) * 3) * sizeof(Vtx));
+    Vtx *verts = alloc_display_list(0x4000);
+
+    //figure this shit out later
+    //(iterate_surface_count(gMarioState->marioObj->header.gfx.posLerp[0], gMarioState->marioObj->header.gfx.posLerp[2]) * 3) * sizeof(Vtx)
 
     if (verts == NULL) {
         return;
