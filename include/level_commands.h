@@ -373,13 +373,17 @@ enum GoddardScene {
     CMD_BBBB(destArea, destNode, flags, 0x00)
 
 #define LIGHT_PLANE(r, g, b, s, x1, z1, x2, z2, y) \
-    CMD_BBBB(LEVEL_CMD_LIGHT_PLANE, 0x4, 0x0, 0x0)
+    CMD_BBBB(LEVEL_CMD_LIGHT_PLANE, 0x14, 0x0, 0x0), \
+    CMD_BBBB(r, g, b, s), \
+    CMD_HH(x1, z1), \
+    CMD_HH(x2, z2), \
+    CMD_HH(y, 0x00)
 
 #define POINT_LIGHT(r, g, b, s, x, y, z) \
     CMD_BBBB(LEVEL_CMD_POINT_LIGHT, 0x10, 0x0, 0x0), \
     CMD_BBBB(r, g, b, s), \
     CMD_HH(x, y), \
-    CMD_HH(z, 0x0)
+    CMD_HH(z, 0x00)
 
 #define INSTANT_WARP(index, destArea, displaceX, displaceY, displaceZ) \
     CMD_BBBB(LEVEL_CMD_CREATE_INSTANT_WARP, 0x10, index, destArea), \

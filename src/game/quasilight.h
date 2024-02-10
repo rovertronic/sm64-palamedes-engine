@@ -34,7 +34,21 @@ typedef struct {
     struct Object *obj;
 } point_light;
 
+typedef struct {
+    f32 brightness;
+    color_u8 color;
+    // -
+    f32 x1;
+    f32 z1;
+    // +
+    f32 x2;
+    f32 z2;
+    f32 y;
+    struct Object *obj;
+} plane_light;
+
 point_light * qsl_create_pl(Vec3f position, color_u8 color, f32 brightness,  struct Object * obj);
+plane_light * qsl_create_plane_light(color_u8 color, f32 brightness, f32 x1, f32 z1, f32 x2, f32 z2, f32 y, struct Object * obj);
 void qsl_remove_pl(struct Object * obj);
 
 vector_s8 qsl_pl_direction(Vec3f position, point_light * pl);

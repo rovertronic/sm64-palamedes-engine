@@ -27,7 +27,9 @@ and have a vertex wiggle animation.
 int qsl_vertex_index = 0;
 
 point_light qsl_point_light_pool[40];
+plane_light qsl_plane_light_pool[10];
 int qsl_point_light_count = 0;
+int qsl_plane_light_count = 0;
 
 dl_to_iterate qsl_dl_pool[20];
 dl_to_iterate * curr_qsl_dl;
@@ -54,6 +56,20 @@ point_light * qsl_create_pl(Vec3f position, color_u8 color, f32 brightness, stru
     qsl_point_light_pool[qsl_point_light_count].obj = obj;
     qsl_point_light_count++;
     return &qsl_point_light_pool[qsl_point_light_count-1];
+}
+
+plane_light * qsl_create_plane_light(color_u8 color, f32 brightness, f32 x1, f32 z1, f32 x2, f32 z2, f32 y, struct Object * obj) {
+    qsl_plane_light_pool[qsl_plane_light_count].x1 = x1;
+    qsl_plane_light_pool[qsl_plane_light_count].z1 = z1;
+    qsl_plane_light_pool[qsl_plane_light_count].x2 = x2;
+    qsl_plane_light_pool[qsl_plane_light_count].z2 = z2;
+    qsl_plane_light_pool[qsl_plane_light_count].y = y;
+
+    qsl_plane_light_pool[qsl_plane_light_count].color = color;
+    qsl_plane_light_pool[qsl_plane_light_count].brightness = brightness;
+    qsl_plane_light_pool[qsl_plane_light_count].obj = obj;
+    qsl_plane_light_count++;
+    return &qsl_plane_light_pool[qsl_plane_light_count-1];
 }
 
 void qsl_remove_pl(struct Object * obj) {
@@ -130,12 +146,25 @@ vector_s8 qsl_sun_direction(Vec3f position) {
 }
 
 color_u8 qsl_plane_color(Vec3f position) {
-    f32 base_y = -3626.0f;
-    f32 light_level = CLAMP_255(CLAMP_0(255.0f-(position[1]-base_y)/4.0f));
-
     color_u8 plane_color;
+
+    for (int i = 0; i < qsl_plane_light_count; i++) {
+        if ((position[0] > qsl_plane_light_pool[i].x1) && (position[0] < qsl_plane_light_pool[i].x2)) {
+            if ((position[2] > qsl_plane_light_pool[i].z1) && (position[2] < qsl_plane_light_pool[i].z2)) {
+                f32 base_y = qsl_plane_light_pool[i].y;
+                f32 light_level = CLAMP_255(CLAMP_0(255.0f-(position[1]-base_y)/qsl_plane_light_pool[i].brightness));
+
+                plane_color.r = CLAMP_255(CLAMP_0((qsl_plane_light_pool[i].color.r/127.0f) * light_level));
+                plane_color.g = CLAMP_255(CLAMP_0((qsl_plane_light_pool[i].color.g/127.0f) * light_level));
+                plane_color.b = CLAMP_255(CLAMP_0((qsl_plane_light_pool[i].color.b/127.0f) * light_level));
+                return plane_color;
+            }
+        }
+    }
+
+    // not above any light plane
     plane_color.r = 0;
-    plane_color.g = light_level;
+    plane_color.g = 0;
     plane_color.b = 0;
     return plane_color;
 }
@@ -341,7 +370,7 @@ void qsl_add_dl_to_iterator(Gfx * dl_to_add, void (*func_to_add)(Vtx * terrain, 
     command_read = segmented_to_virtual(dl_to_add);
     qsl_vertex_index = 0;
 
-    // Populate allocated memory with verices
+    // Populate allocated memory with vertices
     while(!end_of_list) {
         if  ( ((*command_read)>>24) == G_DL)  {
             qsl_gfx_stack[qsl_gfx_stack_level] = command_read+2;
@@ -375,6 +404,7 @@ void qsl_reset(void) {
     osDestroyThread(&gQuasilightThread);
     create_thread(&gQuasilightThread, THREAD_10_QUASILIGHT, qsl_update_vertex_iterator_thread10, NULL, gThread10Stack + THREAD10_STACK, 1);
     qsl_point_light_count = 0;
+    qsl_plane_light_count = 0;
     if (qsl_dl_count > 0) {
         //SM64's memory allocation system is stack based, so this will effectively clear out everything allocated
         //by the vertex iterator even though I'm only running it on the first element

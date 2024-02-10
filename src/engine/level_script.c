@@ -918,6 +918,9 @@ static void level_cmd_set_echo(void) {
 }
 
 static void level_cmd_light_plane(void) {
+    color_u8 light_color = {CMD_GET(u8, 4),CMD_GET(u8, 5),CMD_GET(u8, 6)};
+    f32 light_strength = CMD_GET(u8, 7);
+    qsl_create_plane_light(light_color, light_strength, CMD_GET(s16, 8), CMD_GET(s16, 10), CMD_GET(s16, 12), CMD_GET(s16, 14), CMD_GET(s16, 16), NULL);
     sCurrentCmd = CMD_NEXT;
 }
 
