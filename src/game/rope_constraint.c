@@ -122,17 +122,33 @@ void rope_step(void) {
             // Gravity
             self->y_vel -= ROPE_GRAVITY;
 
-            // Constraint next
             f32 offset;
-            if (self->prev != NULL) {
-                offset = self->prev->y - self->y;
-                self->y_vel += offset * ROPE_STRENGTH;
-            }
+            // Solving joints in a random order allegedly stabilizes a physics simulation,
+            // or so I've been told.
+            if (random_u16()%2==0) {
+                // Constraint next
+                if (self->prev != NULL) {
+                    offset = self->prev->y - self->y;
+                    self->y_vel += offset * ROPE_STRENGTH;
+                }
 
-            // Constraint previous
-            if (self->next != NULL) {
-                offset = self->next->y - self->y;
-                self->y_vel += offset * ROPE_STRENGTH;
+                // Constraint previous
+                if (self->next != NULL) {
+                    offset = self->next->y - self->y;
+                    self->y_vel += offset * ROPE_STRENGTH;
+                }
+            } else {
+                // Constraint previous
+                if (self->next != NULL) {
+                    offset = self->next->y - self->y;
+                    self->y_vel += offset * ROPE_STRENGTH;
+                }
+
+                // Constraint next
+                if (self->prev != NULL) {
+                    offset = self->prev->y - self->y;
+                    self->y_vel += offset * ROPE_STRENGTH;
+                }
             }
 
             self->y_vel -= (self->y_vel * ROPE_DAMPING); // Damping
