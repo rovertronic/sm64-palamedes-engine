@@ -31,6 +31,7 @@
 #include "vc_ultra.h"
 #include "profiling.h"
 #include "emutest.h"
+#include "rope_constraint.h"
 
 // Emulators that the Instant Input patch should not be applied to
 #define INSTANT_INPUT_BLACKLIST (EMU_CONSOLE | EMU_WIIVC | EMU_ARES | EMU_SIMPLE64 | EMU_CEN64)
@@ -824,6 +825,7 @@ void thread5_game_loop(UNUSED void *arg) {
 #ifdef PUPPYPRINT_DEBUG
         puppyprint_profiler_process();
 #endif
+        rope_step();
 
         gGlobalTimer++;
         //profiler_log_thread5_time(BEFORE_DISPLAY_LISTS);
@@ -852,6 +854,8 @@ u8 gInstantWarp = 0;
 u8 gInstantWarpReady;
 u32 lastRenderedFrame = 0xFFFFFFFF;
 u8 gLoadReset = 0;
+
+extern void qsl_update_vertex_iterator_video_thread_test(void);
 
 void thread11_graphics(void) {
     u32 prevTime = 0;

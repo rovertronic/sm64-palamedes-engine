@@ -15,6 +15,7 @@
 #include "surface_load.h"
 #include "game/puppyprint.h"
 #include "game/debug.h"
+#include "game/rope_constraint.h"
 
 #include "config.h"
 
@@ -363,6 +364,7 @@ static void load_static_surfaces(TerrainData **data, TerrainData *vertexData, s3
 
     s32 numSurfaces = *(*data)++;
 
+    rope_surface_count = 0;
     for (i = 0; i < numSurfaces; i++) {
         if (*surfaceRooms != NULL) {
             room = *(*surfaceRooms)++;
@@ -383,6 +385,22 @@ static void load_static_surfaces(TerrainData **data, TerrainData *vertexData, s3
                 surface->force = 0;
             }
 #endif
+
+            if (surfaceType == SURFACE_ROPE) {
+                rope_surface_pool[rope_surface_count].surf = surface;
+                bcopy(surface,&rope_surface_pool[rope_surface_count].home_surf,sizeof(struct Surface));
+                //every surface's vertex should have a reference to the nearest joint
+                Vec3f pos = {surface->vertex1[0],surface->vertex1[1],surface->vertex1[2]};
+                rope_surface_pool[rope_surface_count].vertexs_joint[0] = rope_nearest_joint(pos);
+
+                vec3f_set(pos,surface->vertex2[0],surface->vertex2[1],surface->vertex2[2]);
+                rope_surface_pool[rope_surface_count].vertexs_joint[1] = rope_nearest_joint(pos);
+
+                vec3f_set(pos,surface->vertex3[0],surface->vertex3[1],surface->vertex3[2]);
+                rope_surface_pool[rope_surface_count].vertexs_joint[2] = rope_nearest_joint(pos);
+
+                rope_surface_count++;
+            }
 
             add_surface(surface, FALSE);
         }

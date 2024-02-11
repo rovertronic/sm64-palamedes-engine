@@ -32,6 +32,7 @@
 #include "save_file.h"
 #include "sound_init.h"
 #include "rumble_init.h"
+#include "rope_constraint.h"
 
 
 /**************************************************
@@ -1793,7 +1794,6 @@ s32 execute_mario_action(UNUSED struct Object *obj) {
 #if ENABLE_RUMBLE
         queue_rumble_particles(gMarioState);
 #endif
-
         return gMarioState->particleFlags;
     }
 

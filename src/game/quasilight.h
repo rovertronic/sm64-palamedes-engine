@@ -18,6 +18,7 @@ typedef struct {
 typedef struct {
     Vec3f position;
     Vec3f normal;
+    void * pointer;
 } float_vertex;
 
 typedef struct {
@@ -64,6 +65,7 @@ void qsl_reset(void);
 
 Gfx *geo_terrain_use_point_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_wiggle(s32 callContext, struct GraphNode *node, Mat4 *mtx);
+Gfx *geo_terrain_rope(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_use_global_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_camera_alpha(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 

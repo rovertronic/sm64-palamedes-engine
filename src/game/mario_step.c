@@ -9,6 +9,7 @@
 #include "game_init.h"
 #include "interaction.h"
 #include "mario_step.h"
+#include "rope_constraint.h"
 
 #include "config.h"
 
@@ -270,6 +271,11 @@ s32 stationary_ground_step(struct MarioState *m) {
         vec3s_set(marioObj->header.gfx.angle, 0, m->faceAngle[1], 0);
     }
 
+    if (m->floor->type == SURFACE_ROPE) {
+        rope_joint * mario_rope_joint = rope_nearest_joint(m->pos);
+        mario_rope_joint->y_vel -= 20.0f;
+    }
+
     return stepResult;
 }
 
@@ -370,6 +376,12 @@ s32 perform_ground_step(struct MarioState *m) {
     if (stepResult == GROUND_STEP_HIT_WALL_CONTINUE_QSTEPS) {
         stepResult = GROUND_STEP_HIT_WALL;
     }
+
+    if (m->floor->type == SURFACE_ROPE) {
+        rope_joint * mario_rope_joint = rope_nearest_joint(m->pos);
+        mario_rope_joint->y_vel -= 20.0f;
+    }
+
     return stepResult;
 }
 
@@ -504,6 +516,14 @@ s32 perform_air_quarter_step(struct MarioState *m, Vec3f intendedPos, u32 stepAr
         // Mario landed, but his movement is cancelled and his referenced floor
         // isn't updated (pedro spots)
         m->pos[1] = floorHeight;
+        if (m->floor->type == SURFACE_ROPE) {
+            rope_joint * mario_rope_joint = rope_nearest_joint(m->pos);
+            mario_rope_joint->y_vel -= 80.0f;
+
+            if (m->action == ACT_GROUND_POUND) {
+                mario_rope_joint->y_vel -= 200.0f;
+            }
+        }
         return AIR_STEP_LANDED;
     }
 

@@ -456,7 +456,6 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
     //if (surfaceView) visual_surface_loop();
     //render_edging_shadow();
 #endif
-    rope_step();
     gSPMatrix(gDisplayListHead++, &identityMatrixWorldScale, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     render_edging_shadow();
 

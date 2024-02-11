@@ -8,6 +8,7 @@
 #include "camera.h"
 #include "buffers/buffers.h"
 #include "audio/external.h"
+#include "rope_constraint.h"
 
 #include "levels/test/header.h"
 
@@ -225,6 +226,8 @@ void qsl_init_vtx_list(Vtx * terrain, int size) {
         curr_qsl_dl->addr[qsl_vertex_index].position[0] = terrain[i].v.ob[0];
         curr_qsl_dl->addr[qsl_vertex_index].position[1] = terrain[i].v.ob[1];
         curr_qsl_dl->addr[qsl_vertex_index].position[2] = terrain[i].v.ob[2];
+
+        curr_qsl_dl->addr[qsl_vertex_index].pointer = NULL;
         qsl_vertex_index ++;
     }
 };
@@ -246,8 +249,34 @@ void qsl_update_vtx_list_wiggle(Vtx * terrain, int size) {
     for (int i = 0; i < size; i++) {
         s16 x = terrain[i].v.ob[0];
         s16 z = terrain[i].v.ob[2];
-
         terrain[i].v.ob[1] = curr_qsl_dl->addr[qsl_vertex_index].position[1] + sins((x + z + gGlobalTimer)*0x400) * 30.0f;
+        qsl_vertex_index++;
+    }
+}
+
+void qsl_update_vtx_list_rope(Vtx * terrain, int size) {
+    for (int i = 0; i < size; i++) {
+        rope_joint * my_joint;
+        if (curr_qsl_dl->addr[qsl_vertex_index].pointer == NULL) {
+            // If this vertex is not associated with any joint, find the closest one
+            my_joint = rope_nearest_joint(curr_qsl_dl->addr[qsl_vertex_index].position);
+            curr_qsl_dl->addr[qsl_vertex_index].pointer = my_joint;
+        } else {
+            my_joint = curr_qsl_dl->addr[qsl_vertex_index].pointer;
+        }
+
+        if (gMoveSpeed==1) {
+            terrain[i].v.ob[1] = curr_qsl_dl->addr[qsl_vertex_index].position[1] + my_joint->y;
+        } else {
+            terrain[i].v.ob[1] = curr_qsl_dl->addr[qsl_vertex_index].position[1] + my_joint->y;
+        }
+
+        //Vec3f pos = {curr_qsl_dl->addr[qsl_vertex_index].position[0], terrain[i].v.ob[1], curr_qsl_dl->addr[qsl_vertex_index].position[2]};
+        //point_light * pl = qsl_pl_nearest(pos);
+        //color_u8 color = qsl_color_env(pos, curr_qsl_dl->addr[qsl_vertex_index].normal, pl);
+        //terrain[i].v.cn[0] = color.r;
+        //terrain[i].v.cn[1] = color.g;
+        //terrain[i].v.cn[2] = color.b;
 
         qsl_vertex_index++;
     }
@@ -490,6 +519,7 @@ void qsl_process_object_light(Vec3f pos, struct Object * obj) {
 All these functions apply to whatever model / object you put them on.
 */
 Gfx *geo_terrain_use_global_light(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
+    //return NULL;
     if (callContext == GEO_CONTEXT_RENDER) {
         Vec3f object_pos = {0.0f,0.0,0.0f};
 
@@ -518,7 +548,7 @@ Gfx *geo_terrain_use_global_light(s32 callContext, struct GraphNode *node, Mat4 
         dir_light->l[1].l.colc[2] = sun_col.b;
 
 
-        gSPSetGeometryMode(&gfxlist[0], G_LIGHTING);
+        gSPClearGeometryMode(&gfxlist[0], G_LIGHTING);
         gSPNumLights(&gfxlist[1],NUMLIGHTS_1);
         gSPLight(&gfxlist[2],&(*dir_light).l[0],1);	
         gSPLight(&gfxlist[3],&(*dir_light).a,2);
@@ -556,12 +586,26 @@ Gfx *geo_terrain_wiggle(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
         qsl_add_dl_to_iterator(super_next->displayList, &qsl_update_vtx_list_wiggle, node);
     }
     if (callContext == GEO_CONTEXT_RENDER) {
-        //Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*6);
-        //gSPClearGeometryMode(&gfxlist[0], G_LIGHTING);
-        //gSPEndDisplayList(&gfxlist[1]);
 
-        //geo_append_display_list(gfxlist, LAYER_OPAQUE);
-        //geo_append_display_list(gfxlist, LAYER_ALPHA);
+    }
+
+    return NULL;
+}
+
+
+Gfx *geo_terrain_rope(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
+
+    if (callContext == GEO_CONTEXT_AREA_LOAD) {
+        struct GraphNodeDisplayList * super_next = node->next;
+        qsl_add_dl_to_iterator(super_next->displayList, &qsl_update_vtx_list_rope, node);
+    }
+    if (callContext == GEO_CONTEXT_RENDER) {
+        Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*6);
+        gSPClearGeometryMode(&gfxlist[0], G_LIGHTING);
+        gSPEndDisplayList(&gfxlist[1]);
+
+        geo_append_display_list(gfxlist, LAYER_OPAQUE);
+        geo_append_display_list(gfxlist, LAYER_ALPHA);
     }
 
     return NULL;
