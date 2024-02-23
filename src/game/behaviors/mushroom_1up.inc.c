@@ -24,6 +24,9 @@ void bhv_1up_common_init(void) {
     o->oGravity = 3.0f;
     o->oFriction = 1.0f;
     o->oBuoyancy = 1.0f;
+
+    color_u8 lightcolor = {20,255,20};
+    o->pl = qsl_create_pl(&o->oPosVec,lightcolor,4.0f,o);
 }
 
 void bhv_1up_init(void) {

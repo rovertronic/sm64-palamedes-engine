@@ -29,6 +29,7 @@ int qsl_vertex_index = 0;
 
 point_light qsl_point_light_pool[40];
 plane_light qsl_plane_light_pool[10];
+point_light * qsl_second_nearest_pl = NULL;
 int qsl_point_light_count = 0;
 int qsl_plane_light_count = 0;
 
@@ -38,8 +39,8 @@ int qsl_dl_count = 0;
 u8 qsl_dl_flagged = FALSE;
 
 Vec3f qsl_global_sun_direction = {0.0f, 1.0f, 0.0f};
-color_u8 qsl_global_sun_color = {40,40,40};//{90/2, 95/2, 100/2};
-color_u8 qsl_global_ambient_color = {40,40,40};//{50/2, 45/2, 50/2};
+color_u8 qsl_global_sun_color = {40,49,50};//{90/2, 95/2, 100/2};
+color_u8 qsl_global_ambient_color = {10,10,30};//{50/2, 45/2, 50/2};
 
 vector_s8 vec3f_to_vector_s8(Vec3f vector) {
     vector_s8 returnvec;
@@ -100,6 +101,28 @@ point_light * qsl_pl_nearest(Vec3f position) {
 
         if (dist < smallest_dist) {
             smallest_dist = dist;
+            qsl_second_nearest_pl = nearest_pl;
+            nearest_pl = &qsl_point_light_pool[i];
+        }
+    }
+
+    return nearest_pl;
+}
+
+point_light * qsl_pl_nearest_exclude(Vec3f position, point_light * exclude_light) {
+    f32 smallest_dist = 99999.0f;
+    point_light * nearest_pl = NULL;
+
+    for(int i=0; i<qsl_point_light_count; i++) {
+        if (exclude_light == &qsl_point_light_pool[i]) {continue;}
+        Vec3f transformed_light;
+        vec3f_diff(transformed_light, qsl_point_light_pool[i].position ,position);
+
+        f32 dist = vec3_mag(transformed_light);
+
+        if (dist < smallest_dist) {
+            smallest_dist = dist;
+            qsl_second_nearest_pl = nearest_pl;
             nearest_pl = &qsl_point_light_pool[i];
         }
     }
@@ -451,12 +474,17 @@ void qsl_process_object_light(Vec3f pos, struct Object * obj) {
     }
 
     Gfx *gfxlist = alloc_display_list(sizeof(*gfxlist)*8);
-    Lights3 *dir_light = alloc_display_list(sizeof(*dir_light));
+    Lights4 *dir_light = alloc_display_list(sizeof(*dir_light));
 
     point_light * pl = qsl_pl_nearest(pos);
     if (pl==NULL) {return NULL;}
+    point_light * pl2 = qsl_pl_nearest_exclude(pos,pl);
+
     vector_s8 point_dir = qsl_pl_direction(pos, pl);
     color_u8 point_col = qsl_pl_color(pos, pl);
+
+    vector_s8 point_dir_2 = qsl_pl_direction(pos, pl2);
+    color_u8 point_col_2 = qsl_pl_color(pos, pl2);
 
     color_u8 amb = qsl_ambient_color(pos);
     vector_s8 sun_dir = qsl_sun_direction(pos);
@@ -501,14 +529,25 @@ void qsl_process_object_light(Vec3f pos, struct Object * obj) {
     dir_light->l[2].l.colc[1] = plane_col.g;
     dir_light->l[2].l.colc[2] = plane_col.b;
 
+    dir_light->l[3].l.dir[0]  = point_dir_2.x;
+    dir_light->l[3].l.dir[1]  = point_dir_2.y;
+    dir_light->l[3].l.dir[2]  = point_dir_2.z;
+    dir_light->l[3].l.col[0]  = point_col_2.r;
+    dir_light->l[3].l.col[1]  = point_col_2.g;
+    dir_light->l[3].l.col[2]  = point_col_2.b;
+    dir_light->l[3].l.colc[0] = point_col_2.r;
+    dir_light->l[3].l.colc[1] = point_col_2.g;
+    dir_light->l[3].l.colc[2] = point_col_2.b;
+
 
     gSPSetGeometryMode(&gfxlist[0], G_LIGHTING);
-    gSPNumLights(&gfxlist[1],NUMLIGHTS_3);
+    gSPNumLights(&gfxlist[1],NUMLIGHTS_4);
     gSPLight(&gfxlist[2],&(*dir_light).l[0],1);	
     gSPLight(&gfxlist[3],&(*dir_light).l[1],2);
     gSPLight(&gfxlist[4],&(*dir_light).l[2],3);
-    gSPLight(&gfxlist[5],&(*dir_light).a,4);
-    gSPEndDisplayList(&gfxlist[6]);
+    gSPLight(&gfxlist[5],&(*dir_light).l[3],4);
+    gSPLight(&gfxlist[6],&(*dir_light).a,5);
+    gSPEndDisplayList(&gfxlist[7]);
 
     geo_append_display_list(gfxlist, LAYER_OPAQUE);
     geo_append_display_list(gfxlist, LAYER_ALPHA);
