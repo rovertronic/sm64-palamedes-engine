@@ -20,7 +20,7 @@
 #include "checkerboard_platform/geo.inc.c"
 #include "heart/geo.inc.c"
 #include "flyguy/geo.inc.c"
-#include "breakable_box/geo.inc.c"
+//#include "breakable_box/geo.inc.c"
 #include "bowling_ball/geo.inc.c"
 #include "exclamation_box/geo.inc.c"
 #include "goomba/geo.inc.c"

@@ -38,7 +38,7 @@ dl_to_iterate * curr_qsl_dl;
 int qsl_dl_count = 0;
 u8 qsl_dl_flagged = FALSE;
 
-Vec3f qsl_global_sun_direction = {0.0f, 1.0f, 0.0f};
+Vec3f qsl_global_sun_direction = {0.0f, 0.7071f, 0.7071f};
 color_u8 qsl_global_sun_color = {40,49,50};//{90/2, 95/2, 100/2};
 color_u8 qsl_global_ambient_color = {10,10,30};//{50/2, 45/2, 50/2};
 

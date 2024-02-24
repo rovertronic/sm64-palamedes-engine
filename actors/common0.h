@@ -39,12 +39,12 @@ extern const GeoLayout bowling_ball_geo[];
 extern const GeoLayout bowling_ball_track_geo[];
 
 // breakable_box
-extern const GeoLayout breakable_box_geo[];
-extern const GeoLayout breakable_box_no_shadow_geo[];
-extern const Gfx breakable_box_seg8_sub_dl_end[];
-extern const Gfx breakable_box_seg8_sub_dl_begin[];
-extern const Gfx breakable_box_seg8_dl_crazy_box[];
-extern const Gfx breakable_box_seg8_dl_cork_box[];
+//extern const GeoLayout breakable_box_geo[];
+//extern const GeoLayout breakable_box_no_shadow_geo[];
+//extern const Gfx breakable_box_seg8_sub_dl_end[];
+//extern const Gfx breakable_box_seg8_sub_dl_begin[];
+//extern const Gfx breakable_box_seg8_dl_crazy_box[];
+//extern const Gfx breakable_box_seg8_dl_cork_box[];
 extern const Collision breakable_box_seg8_collision[];
 
 // cannon_barrel

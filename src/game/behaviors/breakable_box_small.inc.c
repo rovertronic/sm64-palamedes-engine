@@ -13,7 +13,7 @@ struct ObjectHitbox sBreakableBoxSmallHitbox = {
 };
 
 void bhv_breakable_box_small_init(void) {
-    color_u8 lightcolor = {255,100,0};
+    color_u8 lightcolor = {255,150,50};
     o->pl = qsl_create_pl(&o->oPosVec,lightcolor,5.0f,o);
 
     o->oGravity = 2.5f;

@@ -1,5 +1,5 @@
-Gfx breakable_box_lantern_ci8_aligner[] = {gsSPEndDisplayList()};
-u8 breakable_box_lantern_ci8[] = {
+Gfx lantern_lantern_ci8_aligner[] = {gsSPEndDisplayList()};
+u8 lantern_lantern_ci8[] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -131,8 +131,8 @@ u8 breakable_box_lantern_ci8[] = {
 	
 };
 
-Gfx breakable_box_lantern_pal_rgba16_aligner[] = {gsSPEndDisplayList()};
-u8 breakable_box_lantern_pal_rgba16[] = {
+Gfx lantern_lantern_pal_rgba16_aligner[] = {gsSPEndDisplayList()};
+u8 lantern_lantern_pal_rgba16[] = {
 	0x00, 0x01, 0xf4, 0x9b, 0xf4, 0xdf, 0xf4, 0xdd, 
 	0xf5, 0x1d, 0xf5, 0x5d, 0xf5, 0x9d, 0xf5, 0x9f, 
 	0xf5, 0xdf, 0xf6, 0x21, 0xf6, 0x1d, 0xf6, 0x1f, 
@@ -167,46 +167,46 @@ u8 breakable_box_lantern_pal_rgba16[] = {
 	0xf3, 0x8d, 
 };
 
-Vtx breakable_box_Cube_mesh_layer_1_vtx_cull[8] = {
-	{{ {-100, -100, 100}, 0, {0, 0}, {0, 0, 0, 0} }},
-	{{ {-100, 100, 100}, 0, {0, 0}, {0, 0, 0, 0} }},
-	{{ {-100, 100, -100}, 0, {0, 0}, {0, 0, 0, 0} }},
-	{{ {-100, -100, -100}, 0, {0, 0}, {0, 0, 0, 0} }},
-	{{ {100, -100, 100}, 0, {0, 0}, {0, 0, 0, 0} }},
-	{{ {100, 100, 100}, 0, {0, 0}, {0, 0, 0, 0} }},
-	{{ {100, 100, -100}, 0, {0, 0}, {0, 0, 0, 0} }},
-	{{ {100, -100, -100}, 0, {0, 0}, {0, 0, 0, 0} }},
+Vtx lantern_Cube_mesh_layer_1_vtx_cull[8] = {
+	{{ {-100, 0, 100}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {-100, 200, 100}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {-100, 200, -100}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {-100, 0, -100}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {100, 0, 100}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {100, 200, 100}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {100, 200, -100}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {100, 0, -100}, 0, {0, 0}, {0, 0, 0, 0} }},
 };
 
-Vtx breakable_box_Cube_mesh_layer_1_vtx_0[24] = {
-	{{ {-100, -100, 100}, 0, {-16, 1008}, {129, 0, 0, 255} }},
-	{{ {-100, 100, 100}, 0, {1008, 1008}, {129, 0, 0, 255} }},
-	{{ {-100, 100, -100}, 0, {1008, -16}, {129, 0, 0, 255} }},
-	{{ {-100, -100, -100}, 0, {-16, -16}, {129, 0, 0, 255} }},
-	{{ {-100, -100, -100}, 0, {-16, 1008}, {0, 0, 129, 255} }},
-	{{ {-100, 100, -100}, 0, {1008, 1008}, {0, 0, 129, 255} }},
-	{{ {100, 100, -100}, 0, {1008, -16}, {0, 0, 129, 255} }},
-	{{ {100, -100, -100}, 0, {-16, -16}, {0, 0, 129, 255} }},
-	{{ {100, -100, -100}, 0, {-16, 1008}, {127, 0, 0, 255} }},
-	{{ {100, 100, -100}, 0, {1008, 1008}, {127, 0, 0, 255} }},
-	{{ {100, 100, 100}, 0, {1008, -16}, {127, 0, 0, 255} }},
-	{{ {100, -100, 100}, 0, {-16, -16}, {127, 0, 0, 255} }},
-	{{ {100, -100, 100}, 0, {-16, 1008}, {0, 0, 127, 255} }},
-	{{ {100, 100, 100}, 0, {1008, 1008}, {0, 0, 127, 255} }},
-	{{ {-100, 100, 100}, 0, {1008, -16}, {0, 0, 127, 255} }},
-	{{ {-100, -100, 100}, 0, {-16, -16}, {0, 0, 127, 255} }},
-	{{ {-100, -100, -100}, 0, {-16, 1008}, {0, 129, 0, 255} }},
-	{{ {100, -100, -100}, 0, {1008, 1008}, {0, 129, 0, 255} }},
-	{{ {100, -100, 100}, 0, {1008, -16}, {0, 129, 0, 255} }},
-	{{ {-100, -100, 100}, 0, {-16, -16}, {0, 129, 0, 255} }},
-	{{ {100, 100, -100}, 0, {-16, 1008}, {0, 127, 0, 255} }},
-	{{ {-100, 100, -100}, 0, {1008, 1008}, {0, 127, 0, 255} }},
-	{{ {-100, 100, 100}, 0, {1008, -16}, {0, 127, 0, 255} }},
-	{{ {100, 100, 100}, 0, {-16, -16}, {0, 127, 0, 255} }},
+Vtx lantern_Cube_mesh_layer_1_vtx_0[24] = {
+	{{ {-100, 0, 100}, 0, {-16, 1008}, {129, 0, 0, 255} }},
+	{{ {-100, 200, 100}, 0, {1008, 1008}, {129, 0, 0, 255} }},
+	{{ {-100, 200, -100}, 0, {1008, -16}, {129, 0, 0, 255} }},
+	{{ {-100, 0, -100}, 0, {-16, -16}, {129, 0, 0, 255} }},
+	{{ {-100, 0, -100}, 0, {-16, 1008}, {0, 0, 129, 255} }},
+	{{ {-100, 200, -100}, 0, {1008, 1008}, {0, 0, 129, 255} }},
+	{{ {100, 200, -100}, 0, {1008, -16}, {0, 0, 129, 255} }},
+	{{ {100, 0, -100}, 0, {-16, -16}, {0, 0, 129, 255} }},
+	{{ {100, 0, -100}, 0, {-16, 1008}, {127, 0, 0, 255} }},
+	{{ {100, 200, -100}, 0, {1008, 1008}, {127, 0, 0, 255} }},
+	{{ {100, 200, 100}, 0, {1008, -16}, {127, 0, 0, 255} }},
+	{{ {100, 0, 100}, 0, {-16, -16}, {127, 0, 0, 255} }},
+	{{ {100, 0, 100}, 0, {-16, 1008}, {0, 0, 127, 255} }},
+	{{ {100, 200, 100}, 0, {1008, 1008}, {0, 0, 127, 255} }},
+	{{ {-100, 200, 100}, 0, {1008, -16}, {0, 0, 127, 255} }},
+	{{ {-100, 0, 100}, 0, {-16, -16}, {0, 0, 127, 255} }},
+	{{ {-100, 0, -100}, 0, {-16, 1008}, {0, 129, 0, 255} }},
+	{{ {100, 0, -100}, 0, {1008, 1008}, {0, 129, 0, 255} }},
+	{{ {100, 0, 100}, 0, {1008, -16}, {0, 129, 0, 255} }},
+	{{ {-100, 0, 100}, 0, {-16, -16}, {0, 129, 0, 255} }},
+	{{ {100, 200, -100}, 0, {-16, 1008}, {0, 127, 0, 255} }},
+	{{ {-100, 200, -100}, 0, {1008, 1008}, {0, 127, 0, 255} }},
+	{{ {-100, 200, 100}, 0, {1008, -16}, {0, 127, 0, 255} }},
+	{{ {100, 200, 100}, 0, {-16, -16}, {0, 127, 0, 255} }},
 };
 
-Gfx breakable_box_Cube_mesh_layer_1_tri_0[] = {
-	gsSPVertex(breakable_box_Cube_mesh_layer_1_vtx_0 + 0, 24, 0),
+Gfx lantern_Cube_mesh_layer_1_tri_0[] = {
+	gsSPVertex(lantern_Cube_mesh_layer_1_vtx_0 + 0, 24, 0),
 	gsSP2Triangles(0, 1, 2, 0, 0, 2, 3, 0),
 	gsSP2Triangles(4, 5, 6, 0, 4, 6, 7, 0),
 	gsSP2Triangles(8, 9, 10, 0, 8, 10, 11, 0),
@@ -217,15 +217,15 @@ Gfx breakable_box_Cube_mesh_layer_1_tri_0[] = {
 };
 
 
-Gfx mat_breakable_box_f3dlite_material[] = {
+Gfx mat_lantern_f3dlite_material[] = {
 	gsDPPipeSync(),
 	gsDPSetCombineLERP(0, 0, 0, TEXEL0, 0, 0, 0, ENVIRONMENT, 0, 0, 0, TEXEL0, 0, 0, 0, ENVIRONMENT),
 	gsDPSetTextureLUT(G_TT_RGBA16),
 	gsSPTexture(65535, 65535, 0, 0, 1),
-	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, breakable_box_lantern_pal_rgba16),
+	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, lantern_lantern_pal_rgba16),
 	gsDPSetTile(0, 0, 0, 256, 5, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
 	gsDPLoadTLUTCmd(5, 124),
-	gsDPSetTextureImage(G_IM_FMT_CI, G_IM_SIZ_8b_LOAD_BLOCK, 1, breakable_box_lantern_ci8),
+	gsDPSetTextureImage(G_IM_FMT_CI, G_IM_SIZ_8b_LOAD_BLOCK, 1, lantern_lantern_ci8),
 	gsDPSetTile(G_IM_FMT_CI, G_IM_SIZ_8b_LOAD_BLOCK, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
 	gsDPLoadBlock(7, 0, 0, 511, 512),
 	gsDPSetTile(G_IM_FMT_CI, G_IM_SIZ_8b, 4, 0, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 5, 0, G_TX_WRAP | G_TX_NOMIRROR, 5, 0),
@@ -233,20 +233,20 @@ Gfx mat_breakable_box_f3dlite_material[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx mat_revert_breakable_box_f3dlite_material[] = {
+Gfx mat_revert_lantern_f3dlite_material[] = {
 	gsDPPipeSync(),
 	gsDPSetTextureLUT(G_TT_NONE),
 	gsSPEndDisplayList(),
 };
 
-Gfx breakable_box_Cube_mesh_layer_1[] = {
+Gfx lantern_Cube_mesh_layer_1[] = {
 	gsSPClearGeometryMode(G_LIGHTING),
-	gsSPVertex(breakable_box_Cube_mesh_layer_1_vtx_cull + 0, 8, 0),
+	gsSPVertex(lantern_Cube_mesh_layer_1_vtx_cull + 0, 8, 0),
 	gsSPSetGeometryMode(G_LIGHTING),
 	gsSPCullDisplayList(0, 7),
-	gsSPDisplayList(mat_breakable_box_f3dlite_material),
-	gsSPDisplayList(breakable_box_Cube_mesh_layer_1_tri_0),
-	gsSPDisplayList(mat_revert_breakable_box_f3dlite_material),
+	gsSPDisplayList(mat_lantern_f3dlite_material),
+	gsSPDisplayList(lantern_Cube_mesh_layer_1_tri_0),
+	gsSPDisplayList(mat_revert_lantern_f3dlite_material),
 	gsDPPipeSync(),
 	gsSPSetGeometryMode(G_LIGHTING),
 	gsSPClearGeometryMode(G_TEXTURE_GEN),

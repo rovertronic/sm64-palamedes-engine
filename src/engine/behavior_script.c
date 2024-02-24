@@ -45,11 +45,11 @@ void obj_update_gfx_pos_and_angle(struct Object *obj) {
     obj->header.gfx.angle[2] = (obj->oFaceAngleRoll  & 0xFFFF);
 
     if (obj->pl) {
-        vec3f_copy(obj->pl->position, &obj->header.gfx.posLerp);
+        //vec3f_copy(obj->pl->position, &obj->header.gfx.posLerp);
         if (obj->oHeldState == HELD_HELD) {
-            //vec3f_copy(obj->pl->position, gMarioState->marioBodyState->heldObjLastPosition);
+            vec3f_copy(obj->pl->position, gMarioState->marioBodyState->heldObjLastPosition);
         } else {
-            //vec3f_copy(obj->pl->position, &obj->header.gfx.posLerp);
+            vec3f_copy(obj->pl->position, &obj->header.gfx.posLerp);
         }
     }
 }

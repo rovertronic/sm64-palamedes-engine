@@ -13,6 +13,8 @@ struct ObjectHitbox sBreakableBoxHitbox = {
 };
 
 void breakable_box_init(void) {
+    color_u8 lightcolor = {255,150,50};
+    o->pl = qsl_create_pl(&o->oPosVec,lightcolor,7.0f,o);
     o->oHiddenObjectSwitchObj = NULL;
     o->oAnimState = BREAKABLE_BOX_ANIM_STATE_CORK_BOX;
     switch (o->oBehParams2ndByte) {
