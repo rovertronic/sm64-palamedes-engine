@@ -28,6 +28,7 @@
 #include "lerp.h"
 #include "level_update.h"
 #include "memory.h"
+#include "general_batcher.h"
 
 /**
  * This file contains the code that processes the scene graph for rendering.
@@ -364,6 +365,12 @@ Mtx identityMatrixWorldScale = {{
  * 3. It does this, because layers 5-7 are non zbuffered, and just doing 0-7 of ZEX, then 0-7 of REJ
  * would make the ZEX 0-4 render on top of Rej's 5-7.
  */
+Vec3f weewee = {0.0f,1000.0f,0.0f};
+Vec3f weewee2 = {0.0f,500.0f,0.0f};
+batchable testbatch2 = {NULL,&weewee2,NULL};
+batchable testbatch = {&testbatch2,&weewee,NULL};
+extern Gfx star_seg3_dl_body[];
+extern Gfx coin_seg3_dl_yellow_0[];
 void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
     struct RenderPhase *renderPhase;
     struct DisplayListNode *currList;
@@ -458,6 +465,10 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
 #endif
     gSPMatrix(gDisplayListHead++, &identityMatrixWorldScale, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     render_edging_shadow();
+
+    gDPPipeSync(gDisplayListHead++);
+    gSPSetGeometryMode(gDisplayListHead++, G_ZBUFFER);
+    general_batcher_batch_pos(coin_seg3_dl_yellow_0,star_seg3_dl_body,&testbatch);
 
 }
 

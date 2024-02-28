@@ -7,8 +7,11 @@
 typedef struct batchable batchable;
 struct batchable {
     batchable * next;
-    Mat4 * transform;
     Vec3f * pos;
+    Mat4 * transform;
 };
+
+void general_batcher_batch_pos(Gfx * material, Gfx * shape, batchable * start);
+void general_batcher_batch_mtx(Gfx * material, Gfx * shape, batchable * start);
 
 #endif

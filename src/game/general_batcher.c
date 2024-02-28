@@ -16,9 +16,24 @@
 void general_batcher_batch_pos(Gfx * material, Gfx * shape, batchable * start) {
     batchable * cur = start;
     gSPDisplayList(gDisplayListHead++, material);
-    while (cur->next != NULL) {
+    while (cur != NULL) {
         Mtx *matrix = (Mtx *) alloc_display_list(sizeof(Mtx));
-        guTranslate(matrix, *cur->pos[0], *cur->pos[1], *cur->pos[2]);
+        Vec3f * pos = cur->pos;
+        guTranslate(matrix, pos[0][0],pos[0][1],pos[0][2]);
+        gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+        gSPDisplayList(gDisplayListHead++, shape);
+        gSPPopMatrix(gDisplayListHead++, G_MTX_MODELVIEW);
+        cur = cur->next;
+    }
+}
+
+void general_batcher_batch_mtx(Gfx * material, Gfx * shape, batchable * start) {
+    batchable * cur = start;
+    gSPDisplayList(gDisplayListHead++, material);
+    while (cur != NULL) {
+        Mat4 * floatMatrix = cur->transform;
+        Mtx *matrix = (Mtx *) alloc_display_list(sizeof(Mtx));
+        mtxf_to_mtx(matrix,floatMatrix);
         gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
         gSPDisplayList(gDisplayListHead++, shape);
         gSPPopMatrix(gDisplayListHead++, G_MTX_MODELVIEW);
