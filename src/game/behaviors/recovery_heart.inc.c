@@ -13,6 +13,11 @@ struct ObjectHitbox sRecoveryHeartHitbox = {
 };
 
 void bhv_recovery_heart_loop(void) {
+    if (o->oTimer == 0) {
+        color_u8 lightcolor = {255,0,0};
+        o->pl = qsl_create_pl(&o->oPosVec,lightcolor,6.0f,o);
+    }
+
     obj_set_hitbox(o, &sRecoveryHeartHitbox);
     if (obj_check_if_collided_with_object(o, gMarioObject)) {
         if (o->oSpinningHeartPlayedSound == 0) {

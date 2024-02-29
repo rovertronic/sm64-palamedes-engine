@@ -175,6 +175,7 @@ u16 level_control_timer(s32 timerOp) {
 }
 
 u32 pressed_pause(void) {
+    return FALSE;
     u32 dialogActive = get_dialog_id() >= 0;
     u32 intangible = (gMarioState->action & ACT_FLAG_INTANGIBLE) != 0;
 

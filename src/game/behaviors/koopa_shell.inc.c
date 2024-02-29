@@ -70,6 +70,11 @@ void bhv_koopa_shell_loop(void) {
 
     switch (o->oAction) {
         case KOOPA_SHELL_ACT_MARIO_NOT_RIDING:
+            if (o->oTimer == 0) {
+                color_u8 lightcolor = {20,255,20};
+                o->pl = qsl_create_pl(&o->oPosVec,lightcolor,6.0f,o);
+            }
+
             cur_obj_update_floor_and_walls();
             cur_obj_if_hit_wall_bounce_away();
 

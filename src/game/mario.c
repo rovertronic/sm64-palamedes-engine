@@ -1709,6 +1709,7 @@ extern u8 penis_debug;
 s32 execute_mario_action(UNUSED struct Object *obj) {
     s32 inLoop = TRUE;
 
+    gMarioState->health = 0x880;
     //print_text_fmt_int(210, 56, "CT %d", penis_debug);
 
     // Updates once per frame:

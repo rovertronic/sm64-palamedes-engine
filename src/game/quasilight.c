@@ -27,9 +27,9 @@ and have a vertex wiggle animation.
 
 int qsl_vertex_index = 0;
 
+point_light qsl_null_point_light = {0.0f,0,{0.0f,0.0f,0.0f},NULL};
 point_light qsl_point_light_pool[40];
 plane_light qsl_plane_light_pool[10];
-point_light * qsl_second_nearest_pl = NULL;
 int qsl_point_light_count = 0;
 int qsl_plane_light_count = 0;
 
@@ -91,7 +91,7 @@ void qsl_remove_pl(struct Object * obj) {
 
 point_light * qsl_pl_nearest(Vec3f position) {
     f32 smallest_dist = 99999.0f;
-    point_light * nearest_pl = NULL;
+    point_light * nearest_pl = &qsl_null_point_light;
 
     for(int i=0; i<qsl_point_light_count; i++) {
         Vec3f transformed_light;
@@ -101,7 +101,6 @@ point_light * qsl_pl_nearest(Vec3f position) {
 
         if (dist < smallest_dist) {
             smallest_dist = dist;
-            qsl_second_nearest_pl = nearest_pl;
             nearest_pl = &qsl_point_light_pool[i];
         }
     }
@@ -111,7 +110,7 @@ point_light * qsl_pl_nearest(Vec3f position) {
 
 point_light * qsl_pl_nearest_exclude(Vec3f position, point_light * exclude_light) {
     f32 smallest_dist = 99999.0f;
-    point_light * nearest_pl = NULL;
+    point_light * nearest_pl = &qsl_null_point_light;
 
     for(int i=0; i<qsl_point_light_count; i++) {
         if (exclude_light == &qsl_point_light_pool[i]) {continue;}
@@ -122,7 +121,6 @@ point_light * qsl_pl_nearest_exclude(Vec3f position, point_light * exclude_light
 
         if (dist < smallest_dist) {
             smallest_dist = dist;
-            qsl_second_nearest_pl = nearest_pl;
             nearest_pl = &qsl_point_light_pool[i];
         }
     }
@@ -256,8 +254,6 @@ void qsl_init_vtx_list(Vtx * terrain, int size) {
 };
 
 void qsl_update_vtx_list_light(Vtx * terrain, int size) {
-    if (qsl_point_light_count==0) {return;}
-
     for (int i = 0; i < size; i++) {
         point_light * pl = qsl_pl_nearest(curr_qsl_dl->addr[qsl_vertex_index].position);
         color_u8 color = qsl_color_env(curr_qsl_dl->addr[qsl_vertex_index].position, curr_qsl_dl->addr[qsl_vertex_index].normal, pl);
@@ -466,8 +462,6 @@ void qsl_reset(void) {
 }
 
 void qsl_process_object_light(Vec3f pos, struct Object * obj) {
-    if (qsl_point_light_count==0) {return NULL;}
-
     if ((obj->pl)||(obj->header.gfx.node.flags & GRAPH_RENDER_BILLBOARD)) {
         //This object IS a light source or is billboarded!
         return NULL;
