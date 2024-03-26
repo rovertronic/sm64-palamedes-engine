@@ -385,7 +385,7 @@ void qsl_update_vtx_list_chowder(Vtx * terrain, int size) {
         // Check if the vertex is behind the camera
 
         // Perspective divide
-        //if (worldpos[2] != 0) {
+        if (worldpos[2] != 0) {
             float1 = 0.5f - worldpos[0] / (f32)worldpos[2];
             float2 = 0.5f - worldpos[1] / (f32)worldpos[2];
             if ((fpclassify(float1) == FP_NAN) || (fpclassify(float1) == FP_SUBNORMAL)) {
@@ -396,7 +396,7 @@ void qsl_update_vtx_list_chowder(Vtx * terrain, int size) {
             }
             screenX = 2 * (float1) * (320);
             screenY = 2 * (float2) * (240);
-        //}
+        }
 
         screenX = CLAMP(screenX,-32000,32000);
         screenY = CLAMP(screenY,-32000,32000);
