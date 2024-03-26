@@ -17,3 +17,5 @@
 #include "water_splash/geo.inc.c"
 #include "sparkle_animation/geo.inc.c"
 #include "mario/geo.inc.c"
+
+#include "shitcoin/geo.inc.c"

@@ -277,6 +277,138 @@ void qsl_update_vtx_list_wiggle(Vtx * terrain, int size) {
     }
 }
 
+/*
+void Get_Screen_Coords(void) {
+        Vec3s marioPos3s;
+        s32 screenX;
+        s32 screenY;
+        f32 float1;
+        f32 float2;
+
+        // Convert Mario's coordinates into vec3s so they can be used in mtxf_mul_vec3s
+        vec3f_to_vec3s(marioPos3s, gMarioState->StarRadarLocation);
+
+        // Transform Mario's coordinates into view frustrum
+        mtxf_mul_vec3s(gMatStack[gMatStackIndex], marioPos3s);
+
+        // Perspective divide
+        if (marioPos3s[2] != 0) {
+            float1 = 0.5f - marioPos3s[0] / (f32)marioPos3s[2];
+            float2 = 0.5f - marioPos3s[1] / (f32)marioPos3s[2];
+            if ((fpclassify(float1) == FP_NAN) || (fpclassify(float1) == FP_SUBNORMAL)) {
+                float1 = 0.0f;
+                }
+            if ((fpclassify(float2) == FP_NAN) || (fpclassify(float2) == FP_SUBNORMAL)) {
+                float2 = 0.0f;
+                }
+            screenX = 2 * (float1) * (gCurGraphNodeRoot->width);
+            screenY = 2 * (float2) * (gCurGraphNodeRoot->height);
+            }
+
+        if (marioPos3s[2] > 0) {
+            return;
+            }
+
+        gMarioState->ScreenPosX = screenX;
+        gMarioState->ScreenPosY = screenY;
+    }
+*/
+
+#define fpclassify(f) __fpclassifyf(f)
+
+extern struct GraphNodeRoot * captured_graph_node;
+
+extern Mat4 gMatStack[32];
+
+union IEEEf2bits {
+    float    f;
+    struct {
+        unsigned int    sign    :1;
+        unsigned int    exp    :8;
+        unsigned int    man    :23;
+    } bits;
+};
+enum
+  {
+    FP_NAN =
+# define FP_NAN 0
+      FP_NAN,
+    FP_INFINITE =
+# define FP_INFINITE 1
+      FP_INFINITE,
+    FP_ZERO =
+# define FP_ZERO 2
+      FP_ZERO,
+    FP_SUBNORMAL =
+# define FP_SUBNORMAL 3
+      FP_SUBNORMAL,
+    FP_NORMAL =
+# define FP_NORMAL 4
+      FP_NORMAL
+  };
+int
+__fpclassifyf(float f)
+{
+    union IEEEf2bits u;
+    u.f = f;
+    if (u.bits.exp == 0) {
+        if (u.bits.man == 0)
+            return (FP_ZERO);
+        return (FP_SUBNORMAL);
+    }
+    if (u.bits.exp == 255) {
+        if (u.bits.man == 0)
+            return (FP_INFINITE);
+        return (FP_NAN);
+    }
+    return (FP_NORMAL);
+}
+
+void qsl_update_vtx_list_chowder(Vtx * terrain, int size) {
+    for (int i = 0; i < size; i++) {
+        Vec3s worldpos = {terrain[i].v.ob[0],terrain[i].v.ob[1],terrain[i].v.ob[2]};
+        s32 screenX;
+        s32 screenY;
+        f32 float1;
+        f32 float2;
+
+        // Convert Mario's coordinates into vec3s so they can be used in mtxf_mul_vec3s
+        //vec3f_to_vec3s(worldpos, curr_qsl_dl->addr[qsl_vertex_index].position);
+
+        // Transform Mario's coordinates into view frustrum
+        mtxf_mul_vec3s(gCameraTransform, worldpos);
+        //if (worldpos[2] > 0) {
+        //    qsl_vertex_index++;
+        //    continue;
+        //}
+
+        // Check if the vertex is behind the camera
+
+        // Perspective divide
+        //if (worldpos[2] != 0) {
+            float1 = 0.5f - worldpos[0] / (f32)worldpos[2];
+            float2 = 0.5f - worldpos[1] / (f32)worldpos[2];
+            if ((fpclassify(float1) == FP_NAN) || (fpclassify(float1) == FP_SUBNORMAL)) {
+                float1 = 0.0f;
+            }
+            if ((fpclassify(float2) == FP_NAN) || (fpclassify(float2) == FP_SUBNORMAL)) {
+                float2 = 0.0f;
+            }
+            screenX = 2 * (float1) * (320);
+            screenY = 2 * (float2) * (240);
+        //}
+
+        screenX = CLAMP(screenX,-32000,32000);
+        screenY = CLAMP(screenY,-32000,32000);
+
+
+        terrain[i].v.tc[0] = screenX * 20;
+        terrain[i].v.tc[1] = screenY * 20;
+
+        qsl_vertex_index++;
+    }
+}
+
 void qsl_update_vtx_list_rope(Vtx * terrain, int size) {
     for (int i = 0; i < size; i++) {
         rope_joint * my_joint;
@@ -654,6 +786,7 @@ Gfx *geo_terrain_camera_alpha(s32 callContext, struct GraphNode *node, Mat4 *mtx
     struct GraphNodeDisplayList * super_next = node->next;
 
     if (callContext == GEO_CONTEXT_AREA_LOAD) {
+        qsl_add_dl_to_iterator(super_next->displayList, &qsl_update_vtx_list_chowder, node);
         qsl_add_dl_to_iterator(super_next->displayList, &qsl_update_vtx_list_camera_alpha, node);
     }
     if (callContext == GEO_CONTEXT_RENDER) {
@@ -679,6 +812,19 @@ Gfx *geo_terrain_camera_alpha(s32 callContext, struct GraphNode *node, Mat4 *mtx
             gSPEndDisplayList(&gfxlist[1]);
             geo_append_display_list(gfxlist, LAYER_TRANSPARENT);
         }
+    }
+
+    return NULL;
+}
+
+Gfx *geo_terrain_chowder(s32 callContext, struct GraphNode *node, Mat4 *mtx) {
+
+    if (callContext == GEO_CONTEXT_AREA_LOAD) {
+        struct GraphNodeDisplayList * super_next = node->next;
+        qsl_add_dl_to_iterator(super_next->displayList, &qsl_update_vtx_list_chowder, node);
+    }
+    if (callContext == GEO_CONTEXT_RENDER) {
+
     }
 
     return NULL;

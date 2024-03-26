@@ -665,6 +665,7 @@ void geo_call_global_function_nodes_helper(struct GraphNode *graphNode, s32 call
     } while ((curNode = curNode->next) != graphNode);
 }
 
+struct GraphNodeRoot * captured_graph_node;
 /**
  * Call the update functions of geo nodes that are stored in global variables.
  * These variables include gCurGraphNodeMasterList, gCurGraphNodeCamFrustum,
@@ -675,6 +676,7 @@ void geo_call_global_function_nodes_helper(struct GraphNode *graphNode, s32 call
 void geo_call_global_function_nodes(struct GraphNode *graphNode, s32 callContext) {
     if (graphNode->flags & GRAPH_RENDER_ACTIVE) {
         gCurGraphNodeRoot = (struct GraphNodeRoot *) graphNode;
+        captured_graph_node = gCurGraphNodeRoot;
 
         if (graphNode->children != NULL) {
             geo_call_global_function_nodes_helper(graphNode->children, callContext);

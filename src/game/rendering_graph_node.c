@@ -466,9 +466,9 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
     gSPMatrix(gDisplayListHead++, &identityMatrixWorldScale, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     render_edging_shadow();
 
-    gDPPipeSync(gDisplayListHead++);
-    gSPSetGeometryMode(gDisplayListHead++, G_ZBUFFER);
-    general_batcher_batch_pos(coin_seg3_dl_yellow_0,star_seg3_dl_body,&testbatch);
+    //gDPPipeSync(gDisplayListHead++);
+    //gSPSetGeometryMode(gDisplayListHead++, G_ZBUFFER);
+    //general_batcher_batch_pos(coin_seg3_dl_yellow_0,star_seg3_dl_body,&testbatch);
 
 }
 
@@ -574,6 +574,7 @@ void geo_process_master_list(struct GraphNodeMasterList *node) {
         geo_process_node_and_siblings(node->node.children);
     }
 }
+
 
 /**
  * Process a perspective projection node.
@@ -684,7 +685,7 @@ u8 sSkipObject = 0;
 Mat4 gCameraTransform;
 
 Lights1 defaultLight = gdSPDefLights1(
-    0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x00, 127, 0x00
+    0xFF, 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x00, 127, 0x00
 );
 
 Lights2 templight = gdSPDefLights2(
@@ -694,8 +695,8 @@ Lights2 templight = gdSPDefLights2(
 );
 
 void setup_global_light() {
-    //Lights1* curLight = (Lights1*)alloc_display_list(sizeof(Lights1));
-    //bcopy(&defaultLight, curLight, sizeof(Lights1));
+    Lights1* curLight = (Lights1*)alloc_display_list(sizeof(Lights1));
+    bcopy(&defaultLight, curLight, sizeof(Lights1));
 
 #ifdef WORLDSPACE_LIGHTING
     //curLight->l->l.dir[0] = (s8)(globalLightDirection[0]);
@@ -1005,6 +1006,9 @@ void geo_process_animated_part(const struct GraphNodeAnimatedPart *node) {
             vec3s_copy(rotation, gCurGraphNodeObjectNode->header.gfx.animInfo.animRotStack[gCurrAnimPos]);
         }
     }
+    rotation[0] *= 1.1f;
+    rotation[1] *= 1.1f;
+    rotation[2] *= 1.1f;
     mtxf_rotate_xyz_and_translate_and_mul(rotation, translation, gMatStack[gMatStackIndex + 1], gMatStack[gMatStackIndex]);
     gCurrAnimPos++;
     inc_mat_stack();
@@ -1309,7 +1313,7 @@ void geo_process_object(struct Object *node) {
             mtxf_translate(gMatStack[gMatStackIndex + 1], node->header.gfx.posLerp);
         }
         else{
-            qsl_process_object_light(node->header.gfx.posLerp, node);
+            //qsl_process_object_light(node->header.gfx.posLerp, node);
             if (!noThrowMatrix) {
                 mtxf_scale_vec3f(gMatStack[gMatStackIndex + 1], *node->header.gfx.throwMatrix, node->header.gfx.scaleLerp);
                 gMatStack[gMatStackIndex + 1][3][0] = node->header.gfx.posLerp[0];

@@ -68,6 +68,7 @@ Gfx *geo_terrain_wiggle(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_rope(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_use_global_light(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 Gfx *geo_terrain_camera_alpha(s32 callContext, struct GraphNode *node, Mat4 *mtx);
+Gfx *geo_terrain_chowder(s32 callContext, struct GraphNode *node, Mat4 *mtx);
 
 void qsl_process_object_light(Vec3f pos, struct Object *obj);
 
