@@ -944,9 +944,9 @@ void update_hud_values(void) {
             if (gGlobalTimer & 1) {
                 u32 coinSound;
                 if (gMarioState->action & (ACT_FLAG_SWIMMING | ACT_FLAG_METAL_WATER)) {
-                    coinSound = SOUND_GENERAL_COIN_WATER;
+                    coinSound = SOUND_PEACH_MARIO;
                 } else {
-                    coinSound = SOUND_GENERAL_COIN;
+                    coinSound = SOUND_PEACH_MARIO;
                 }
 
                 gHudDisplay.coins++;
@@ -1414,6 +1414,6 @@ s32 lvl_set_current_level(UNUSED s16 initOrUpdate, s32 levelNum) {
  * Play the "thank you so much for to playing my game" sound.
  */
 s32 lvl_play_the_end_screen_sound(UNUSED s16 initOrUpdate, UNUSED s32 levelNum) {
-    play_sound(SOUND_MENU_THANK_YOU_PLAYING_MY_GAME, gGlobalSoundSource);
+    //play_sound(SOUND_MENU_THANK_YOU_PLAYING_MY_GAME, gGlobalSoundSource);
     return TRUE;
 }

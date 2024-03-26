@@ -1370,7 +1370,7 @@ void common_slide_action(struct MarioState *m, u32 endAction, u32 airAction, s32
         case GROUND_STEP_LEFT_GROUND:
             set_mario_action(m, airAction, 0);
             if (m->forwardVel < -50.0f || 50.0f < m->forwardVel) {
-                play_sound(SOUND_MARIO_HOOHOO, m->marioObj->header.gfx.cameraToObject);
+                play_sound(SOUND_PEACH_POWER_OF_THE_STARS, m->marioObj->header.gfx.cameraToObject);
             }
             break;
 

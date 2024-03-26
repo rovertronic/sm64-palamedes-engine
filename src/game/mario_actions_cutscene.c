@@ -611,8 +611,23 @@ void general_star_dance_handler(struct MarioState *m, s32 isInWater) {
                 }
                 break;
 
-            case 42:
+            case 40:
                 play_sound(SOUND_MARIO_HERE_WE_GO, m->marioObj->header.gfx.cameraToObject);
+                break;
+
+            case 42:
+            case 44:
+            case 46:
+            case 48:
+            case 50:
+                gMarioObject->header.gfx.scale[1] = 2.0f;
+                break;
+
+            case 43:
+            case 45:
+            case 47:
+            case 49:
+                gMarioObject->header.gfx.scale[1] = 1.0f;
                 break;
 
             case 80:
@@ -1871,7 +1886,7 @@ static void jumbo_star_cutscene_taking_off(struct MarioState *m) {
                 break;
 
             case 28:
-                play_sound(SOUND_MARIO_HOOHOO, marioObj->header.gfx.cameraToObject);
+                play_sound(SOUND_PEACH_POWER_OF_THE_STARS, marioObj->header.gfx.cameraToObject);
                 break;
 
             case 60:

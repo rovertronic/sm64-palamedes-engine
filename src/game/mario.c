@@ -247,13 +247,7 @@ void play_sound_if_no_flag(struct MarioState *m, u32 soundBits, u32 flags) {
  */
 void play_mario_jump_sound(struct MarioState *m) {
     if (!(m->flags & MARIO_MARIO_SOUND_PLAYED)) {
-        if (m->action == ACT_TRIPLE_JUMP) {
-            play_sound(SOUND_MARIO_YAHOO_WAHA_YIPPEE + ((gAudioRandom % 5) << 16),
-                       m->marioObj->header.gfx.cameraToObject);
-        } else {
-            play_sound(SOUND_MARIO_YAH_WAH_HOO + ((gAudioRandom % 3) << 16),
-                       m->marioObj->header.gfx.cameraToObject);
-        }
+        play_sound(SOUND_PEACH_POWER_OF_THE_STARS,m->marioObj->header.gfx.cameraToObject);
         m->flags |= MARIO_MARIO_SOUND_PLAYED;
     }
 }
@@ -1768,7 +1762,7 @@ s32 execute_mario_action(UNUSED struct Object *obj) {
         }
 
         sink_mario_in_quicksand(gMarioState);
-        squish_mario_model(gMarioState);
+        //squish_mario_model(gMarioState);
         set_submerged_cam_preset_and_spawn_bubbles(gMarioState);
         update_mario_health(gMarioState);
 #ifdef BREATH_METER

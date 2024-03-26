@@ -439,6 +439,7 @@ Gfx *geo_switch_mario_hand(s32 callContext, struct GraphNode *node, UNUSED Mat4 
     struct MarioBodyState *bodyState = &gBodyStates[0];
 
     if (callContext == GEO_CONTEXT_RENDER) {
+        bodyState->handState = MARIO_HAND_FISTS;
         if (bodyState->handState == MARIO_HAND_FISTS) {
             // switch between fists (0) and open (1)
             switchCase->selectedCase = ((bodyState->action & ACT_FLAG_SWIMMING_OR_FLYING) != 0);

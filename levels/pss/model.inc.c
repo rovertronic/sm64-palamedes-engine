@@ -8852,6 +8852,8 @@ Gfx pss_dl_zdark_018_mesh_layer_5_tri_0[] = {
 
 Gfx mat_pss_dl_Material_0_f3d[] = {
 	gsDPPipeSync(),
+	gsDPSetTexturePersp(G_TP_PERSP),
+	//gsSPPerspNormalize(2000),
 	gsDPSetCombineLERP(0, 0, 0, TEXEL0, 0, 0, 0, ENVIRONMENT, 0, 0, 0, TEXEL0, 0, 0, 0, ENVIRONMENT),
 	gsDPSetTextureFilter(G_TF_POINT),
 	gsDPSetTextureLUT(G_TT_RGBA16),
