@@ -33,3 +33,4 @@
 
 #include "shitcoin/model.inc.c"
 #include "retrostar/model.inc.c"
+#include "mario2/model.inc.c"

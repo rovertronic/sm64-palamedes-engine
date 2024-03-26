@@ -335,4 +335,6 @@ extern const Gfx white_particle_small_unused_dl[];
 
 #include "retrostar/geo_header.h"
 
+#include "mario2/geo_header.h"
+
 #endif

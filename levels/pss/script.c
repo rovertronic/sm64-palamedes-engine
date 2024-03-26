@@ -39,7 +39,11 @@ const LevelScript level_pss_entry[] = {
 	/* Fast64 end persistent block [level commands] */
 
 	AREA(1, pss_area_1),
+		WARP_NODE(240, LEVEL_ENDING, 0x01, 0x0A, WARP_NO_CHECKPOINT),
+		WARP_NODE(241, LEVEL_PSS, 0x01, 0x0A, WARP_NO_CHECKPOINT),
+		WARP_NODE(0x0A, LEVEL_BOB, 0x01, 0x0A, WARP_NO_CHECKPOINT),
 		MARIO_POS(0x01, 0, 4608, 6144, -5631),
+		OBJECT(MODEL_NONE, 4608, 6384, -5631, 0, -90, 0, (0x0A << 16), bhvDeathWarp),
 		OBJECT(MODEL_YELLOW_COIN, 3262, 6144, -5713, 0, 0, 0, 0x00000000, bhvYellowCoin),
 		OBJECT(MODEL_YELLOW_COIN, 3516, 6144, -5743, 0, 0, 0, 0x00000000, bhvYellowCoin),
 		OBJECT(MODEL_YELLOW_COIN, 3998, 6144, -5711, 0, 0, 0, 0x00000000, bhvYellowCoin),

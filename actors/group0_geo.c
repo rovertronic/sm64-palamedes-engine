@@ -20,3 +20,4 @@
 
 #include "shitcoin/geo.inc.c"
 #include "retrostar/geo.inc.c"
+#include "mario2/geo.inc.c"

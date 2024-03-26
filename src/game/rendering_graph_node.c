@@ -948,6 +948,45 @@ void geo_process_background(struct GraphNodeBackground *node) {
     }
 }
 
+void mtxf_billboard_no_translate(Mat4 dest, Mat4 mtx, Vec3f position, Vec3f scale, s16 angle) {
+    PUPPYPRINT_ADD_COUNTER(gPuppyCallCounter.matrix);
+    register s32 i;
+    register f32 sx = scale[0];
+    register f32 sy = scale[1];
+    register f32 sz = scale[2];
+    Mat4* cameraMat = &gCameraTransform;
+    for (i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            dest[i][j] = (*cameraMat)[j][i];
+        }
+        dest[i][3] = 0.0f;
+    }
+    if (angle != 0x0) {
+        float m00 = dest[0][0];
+        float m01 = dest[0][1];
+        float m02 = dest[0][2];
+        float m10 = dest[1][0];
+        float m11 = dest[1][1];
+        float m12 = dest[1][2];
+        float cosa = coss(angle);
+        float sina = sins(angle);
+        dest[0][0] = cosa * m00 + sina * m10; 
+        dest[0][1] = cosa * m01 + sina * m11; 
+        dest[0][2] = cosa * m02 + sina * m12;
+        dest[1][0] = -sina * m00 + cosa * m10;
+        dest[1][1] = -sina * m01 + cosa * m11;
+        dest[1][2] = -sina * m02 + cosa * m12;
+    }
+    for (i = 0; i < 3; i++) {
+        dest[0][i] *= sx;
+        dest[1][i] *= sy;
+        dest[2][i] *= sz;
+    }
+
+    // Translation = input translation + position
+    dest[3][3] = 1.0f;
+}
+
 /**
  * Render an animated part. The current animation state is not part of the node
  * but set in global variables. If an animated part is skipped, everything afterwards desyncs.
@@ -1006,13 +1045,28 @@ void geo_process_animated_part(const struct GraphNodeAnimatedPart *node) {
             vec3s_copy(rotation, gCurGraphNodeObjectNode->header.gfx.animInfo.animRotStack[gCurrAnimPos]);
         }
     }
-    rotation[0] *= 1.1f;
-    rotation[1] *= 1.1f;
-    rotation[2] *= 1.1f;
+
     mtxf_rotate_xyz_and_translate_and_mul(rotation, translation, gMatStack[gMatStackIndex + 1], gMatStack[gMatStackIndex]);
     gCurrAnimPos++;
-    inc_mat_stack();
-    append_dl_and_return((struct GraphNodeDisplayList *) node);
+
+    Mtx *mtx = alloc_display_list(sizeof(*mtx));
+    gMatStackIndex++;
+
+    Mat4 evil_faker_mat;
+    Vec3f scale_accomplice = {0.3f,0.3f,0.3f};
+    mtxf_rotate_xyz_and_translate_and_mul(rotation, translation, evil_faker_mat, gMatStack[gMatStackIndex-1]);
+    mtxf_billboard_no_translate(evil_faker_mat, gMatStack[gMatStackIndex], &gMatStack[gMatStackIndex][3], scale_accomplice, gCurGraphNodeCamera->roll);
+
+    mtxf_to_mtx(mtx, evil_faker_mat);
+    gMatStackFixed[gMatStackIndex] = mtx;
+
+    if (node->displayList != NULL) {
+        geo_append_display_list(node->displayList, GET_GRAPH_NODE_LAYER(node->node.flags));
+    }
+    if (node->node.children != NULL) {
+        geo_process_node_and_siblings(node->node.children);
+    }
+    gMatStackIndex--;
 }
 
 s32 load_patchable_table_render(struct DmaHandlerList *list, s32 index) {
