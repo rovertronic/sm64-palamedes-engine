@@ -32,3 +32,4 @@
 #endif
 
 #include "shitcoin/model.inc.c"
+#include "retrostar/model.inc.c"

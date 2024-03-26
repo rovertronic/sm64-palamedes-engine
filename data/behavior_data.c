@@ -4124,6 +4124,7 @@ const BehaviorScript bhvCelebrationStar[] = {
     BEGIN(OBJ_LIST_LEVEL),
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     CALL_NATIVE(bhv_celebration_star_init),
+    BILLBOARD(),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_celebration_star_loop),
     END_LOOP(),
@@ -4538,6 +4539,7 @@ const BehaviorScript bhvVanishCap[] = {
 const BehaviorScript bhvStar[] = {
     BEGIN(OBJ_LIST_LEVEL),
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    BILLBOARD(),
     CALL_NATIVE(bhv_init_room),
     CALL_NATIVE(bhv_collect_star_init),
     BEGIN_LOOP(),
