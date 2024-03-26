@@ -468,8 +468,6 @@ void qsl_update_vertex_iterator_thread10(void) {
     //color_u8 col2 = {255,0,0};
     //qsl_create_pl(plac,col2,4.0f,NULL);
 
-    play_sound(SOUND_MENU_STAR_SOUND, gGlobalSoundSource);
-
     while (TRUE) {
 
         for (int i = 0; i<qsl_dl_count; i++) {
