@@ -244,6 +244,7 @@ s32 render_fade_transition_into_color(u8 transTime, struct WarpTransitionData *t
  * (such as the star, circle and Mario and bowser´s heads).
  */
 s32 render_screen_transition(s8 transType, u8 transTime, struct WarpTransitionData *transData) {
+    transTime = 0;
     switch (transType) {
         case WARP_TRANSITION_FADE_FROM_COLOR:
             return render_fade_transition_from_color(transTime, transData);

@@ -125,5 +125,11 @@
     },
     "23_retroslide": [
         "retroslide"
+    ],
+    "24_retrostar": [
+        "retrostar"
+    ],
+    "25_win": [
+        "win"
     ]
 }

@@ -606,13 +606,13 @@ void general_star_dance_handler(struct MarioState *m, s32 isInWater) {
                     if (obj_has_model(celebStar, MODEL_BOWSER_KEY)) {
                         play_music(SEQ_PLAYER_ENV, SEQUENCE_ARGS(15, SEQ_EVENT_CUTSCENE_COLLECT_KEY), 0);
                     } else {
-                        play_music(SEQ_PLAYER_ENV, SEQUENCE_ARGS(15, SEQ_EVENT_CUTSCENE_COLLECT_STAR), 0);
+                        play_music(SEQ_PLAYER_ENV, SEQUENCE_ARGS(15, SEQ_RETROSTAR), 0);
                     }
                 }
                 break;
 
             case 40:
-                play_sound(SOUND_MARIO_HERE_WE_GO, m->marioObj->header.gfx.cameraToObject);
+                play_sound(SOUND_PEACH_SOMETHING_SPECIAL, m->marioObj->header.gfx.cameraToObject);
                 break;
 
             case 42:

@@ -1866,6 +1866,8 @@ void init_mario(void) {
         capObject->oForwardVel = 0;
         capObject->oMoveAngleYaw = 0;
     }
+
+    gMarioState->faceAngle[1] += 0x4000;
 }
 
 void init_mario_from_save_file(void) {

@@ -1415,5 +1415,6 @@ s32 lvl_set_current_level(UNUSED s16 initOrUpdate, s32 levelNum) {
  */
 s32 lvl_play_the_end_screen_sound(UNUSED s16 initOrUpdate, UNUSED s32 levelNum) {
     //play_sound(SOUND_MENU_THANK_YOU_PLAYING_MY_GAME, gGlobalSoundSource);
+    play_music(SEQ_PLAYER_ENV, SEQUENCE_ARGS(15, SEQ_WIN), 0);
     return TRUE;
 }

@@ -3149,7 +3149,7 @@ void reset_camera(struct Camera *c) {
     sZeroZoomDist = 0.f;
     sBehindMarioSoundTimer = 0;
     sCSideButtonYaw = 0;
-    s8DirModeBaseYaw = 0;
+    s8DirModeBaseYaw = 0x4000;
     s8DirModeYawOffset = 0;
     c->doorStatus = DOOR_DEFAULT;
     sMarioCamState->headRotation[0] = 0;
@@ -4545,15 +4545,15 @@ void play_camera_buzz_if_c_sideways(void) {
 }
 
 void play_sound_cbutton_up(void) {
-    play_sound(SOUND_MENU_CAMERA_ZOOM_IN, gGlobalSoundSource);
+    //play_sound(SOUND_MENU_CAMERA_ZOOM_IN, gGlobalSoundSource);
 }
 
 void play_sound_cbutton_down(void) {
-    play_sound(SOUND_MENU_CAMERA_ZOOM_OUT, gGlobalSoundSource);
+    //play_sound(SOUND_MENU_CAMERA_ZOOM_OUT, gGlobalSoundSource);
 }
 
 void play_sound_cbutton_side(void) {
-    play_sound(SOUND_MENU_CAMERA_TURN, gGlobalSoundSource);
+    //play_sound(SOUND_MENU_CAMERA_TURN, gGlobalSoundSource);
 }
 
 void play_sound_button_change_blocked(void) {
