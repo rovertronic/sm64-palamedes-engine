@@ -468,7 +468,7 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
 
     gDPPipeSync(gDisplayListHead++);
     gSPSetGeometryMode(gDisplayListHead++, G_ZBUFFER);
-    general_batcher_batch_pos(coin_seg3_dl_yellow_0,star_seg3_dl_body,&testbatch);
+    //general_batcher_batch_pos(coin_seg3_dl_yellow_0,star_seg3_dl_body,&testbatch);
 
 }
 

@@ -13,6 +13,7 @@
 #include "spawn_object.h"
 #include "types.h"
 #include "puppylights.h"
+#include "quasilight.h"
 
 /**
  * Attempt to allocate an object from freeList (singly linked) and append it
@@ -102,6 +103,11 @@ void unload_object(struct Object *obj) {
     geo_add_child(&gObjParentGraphNode, &obj->header.gfx.node);
 
     obj->header.gfx.node.flags &= ~(GRAPH_RENDER_BILLBOARD | GRAPH_RENDER_ACTIVE);
+
+    if (obj->pl) {
+        qsl_remove_pl(obj);
+        obj->pl = NULL;
+    }
 
     deallocate_object(&gFreeObjectList, &obj->header);
 }

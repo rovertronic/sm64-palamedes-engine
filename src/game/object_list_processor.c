@@ -392,11 +392,6 @@ s32 unload_deactivated_objects_in_list(struct ObjectNode *objList) {
                 set_object_respawn_info_bits(gCurrentObject, RESPAWN_INFO_DONT_RESPAWN);
             }
 
-            if (gCurrentObject->pl) {
-                qsl_remove_pl(gCurrentObject);
-                gCurrentObject->pl = NULL;
-            }
-
             unload_object(gCurrentObject);
         }
     }

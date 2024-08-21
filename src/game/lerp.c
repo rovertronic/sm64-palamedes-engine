@@ -4,8 +4,8 @@
 #include "engine/math_util.h"
 #include "camera.h"
 
-#define LERP_THRESHOLD 200.0f
-#define LERP_THRESHOLD_ANGLE 0x2000
+#define LERP_THRESHOLD 400.0f
+#define LERP_THRESHOLD_ANGLE 0x3000
 
 static f32 localLerp(f32 current, f32 target, f32 multiplier) {
     current = current + (target - current) * multiplier;

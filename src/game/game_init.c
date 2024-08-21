@@ -32,6 +32,7 @@
 #include "profiling.h"
 #include "emutest.h"
 #include "rope_constraint.h"
+#include "engine/mheap.h"
 
 // Emulators that the Instant Input patch should not be applied to
 #define INSTANT_INPUT_BLACKLIST (EMU_CONSOLE | EMU_WIIVC | EMU_ARES | EMU_SIMPLE64 | EMU_CEN64)
@@ -757,6 +758,8 @@ void setup_game_memory(void) {
     load_segment(SEGMENT_LEVEL_ENTRY, _entrySegmentRomStart, _entrySegmentRomEnd, MEMORY_POOL_LEFT, NULL, NULL);
     // Setup Segment 2 (Fonts, Text, etc)
     load_segment_decompress(SEGMENT_SEGMENT2, _segment2_mio0SegmentRomStart, _segment2_mio0SegmentRomEnd);
+    // Setup memory heap
+    init_memory_heap();
 }
 
 /**

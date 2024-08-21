@@ -1,5 +1,6 @@
 #include "main.h"
 #include "engine/math_util.h"
+#include "engine/mheap.h"
 #include "game_init.h"
 #include "quasilight.h"
 #include "memory.h"
@@ -415,7 +416,7 @@ void qsl_add_dl_to_iterator(Gfx * dl_to_add, void (*func_to_add)(Vtx * terrain, 
     qsl_dl_pool[qsl_dl_count].dl = dl_to_add;
     qsl_dl_pool[qsl_dl_count].func = func_to_add;
     qsl_dl_pool[qsl_dl_count].node = node;
-    qsl_dl_pool[qsl_dl_count].addr = main_pool_alloc(total_size,MEMORY_POOL_LEFT);
+    qsl_dl_pool[qsl_dl_count].addr = allocate(total_size);
 
     qsl_gfx_stack_level = 0;
     end_of_list = FALSE;
@@ -457,12 +458,10 @@ void qsl_reset(void) {
     create_thread(&gQuasilightThread, THREAD_10_QUASILIGHT, qsl_update_vertex_iterator_thread10, NULL, gThread10Stack + THREAD10_STACK, 1);
     qsl_point_light_count = 0;
     qsl_plane_light_count = 0;
-    if (qsl_dl_count > 0) {
-        //SM64's memory allocation system is stack based, so this will effectively clear out everything allocated
-        //by the vertex iterator even though I'm only running it on the first element
-        main_pool_free(qsl_dl_pool[0].addr);
-        qsl_dl_count = 0;
+    for (int i = 0; i < qsl_dl_count; i++) {
+        deallocate(qsl_dl_pool[i].addr);
     }
+    qsl_dl_count = 0;
 }
 
 void qsl_process_object_light(Vec3f pos, struct Object * obj) {
