@@ -20,5 +20,11 @@ struct list {
 typedef struct list list;
 typedef struct list_item list_item;
 
+void * list_create_and_add(list * list_);
+void list_add(list * list_, void * data_);
+void list_clear(list * list_);
+s32 list_is_empty(list * list_);
+void list_delete(list * list_, void * data);
+
 
 #endif

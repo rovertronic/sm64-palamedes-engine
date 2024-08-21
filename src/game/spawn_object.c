@@ -105,7 +105,7 @@ void unload_object(struct Object *obj) {
     obj->header.gfx.node.flags &= ~(GRAPH_RENDER_BILLBOARD | GRAPH_RENDER_ACTIVE);
 
     if (obj->pl) {
-        qsl_remove_pl(obj);
+        qsl_remove_pl(obj->pl);
         obj->pl = NULL;
     }
 

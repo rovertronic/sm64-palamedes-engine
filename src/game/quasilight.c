@@ -10,6 +10,7 @@
 #include "buffers/buffers.h"
 #include "audio/external.h"
 #include "rope_constraint.h"
+#include "linked_list.h"
 
 #include "levels/test/header.h"
 
@@ -28,10 +29,10 @@ and have a vertex wiggle animation.
 
 int qsl_vertex_index = 0;
 
+list qsl_point_light_list = {sizeof(point_light),NULL,NULL};
+
 point_light qsl_point_light_pool[40];
 plane_light qsl_plane_light_pool[10];
-point_light * qsl_second_nearest_pl = NULL;
-int qsl_point_light_count = 0;
 int qsl_plane_light_count = 0;
 
 dl_to_iterate qsl_dl_pool[20];
@@ -53,12 +54,14 @@ vector_s8 vec3f_to_vector_s8(Vec3f vector) {
 }
 
 point_light * qsl_create_pl(Vec3f position, color_u8 color, f32 brightness, struct Object * obj) {
-    vec3f_copy(qsl_point_light_pool[qsl_point_light_count].position,position);
-    qsl_point_light_pool[qsl_point_light_count].color = color;
-    qsl_point_light_pool[qsl_point_light_count].brightness = brightness;
-    qsl_point_light_pool[qsl_point_light_count].obj = obj;
-    qsl_point_light_count++;
-    return &qsl_point_light_pool[qsl_point_light_count-1];
+    point_light * new_point_light = list_create_and_add(&qsl_point_light_list);
+
+    vec3f_copy(new_point_light->position,position);
+    new_point_light->color = color;
+    new_point_light->brightness = brightness;
+    new_point_light->obj = obj;
+
+    return new_point_light;
 }
 
 plane_light * qsl_create_plane_light(color_u8 color, f32 brightness, f32 x1, f32 z1, f32 x2, f32 z2, f32 y, struct Object * obj) {
@@ -75,36 +78,28 @@ plane_light * qsl_create_plane_light(color_u8 color, f32 brightness, f32 x1, f32
     return &qsl_plane_light_pool[qsl_plane_light_count-1];
 }
 
-void qsl_remove_pl(struct Object * obj) {
-    for (int i=0; i<qsl_point_light_count; i++) {
-        if (qsl_point_light_pool[i].obj == obj) {
-            for (int j=i; j<qsl_point_light_count; j++) {
-                bcopy(&qsl_point_light_pool[j+1],&qsl_point_light_pool[j],sizeof(qsl_point_light_pool[0]));
-                if (qsl_point_light_pool[j].obj) {
-                    qsl_point_light_pool[j].obj->pl = &qsl_point_light_pool[j];
-                }
-            }
-            qsl_point_light_count--;
-            return;
-        }
-    }
+void qsl_remove_pl(point_light * pl) {
+    list_delete(&qsl_point_light_list,pl);
 }
 
 point_light * qsl_pl_nearest(Vec3f position) {
     f32 smallest_dist = 99999.0f;
     point_light * nearest_pl = NULL;
+    list_item * cur_pl_item = qsl_point_light_list.start;
 
-    for(int i=0; i<qsl_point_light_count; i++) {
+    while (cur_pl_item != NULL) {
+        point_light * cur_pl = (point_light *)cur_pl_item->data;
+
         Vec3f transformed_light;
-        vec3f_diff(transformed_light, qsl_point_light_pool[i].position ,position);
-
+        vec3f_diff(transformed_light, cur_pl->position ,position);
         f32 dist = vec3_mag(transformed_light);
 
         if (dist < smallest_dist) {
             smallest_dist = dist;
-            qsl_second_nearest_pl = nearest_pl;
-            nearest_pl = &qsl_point_light_pool[i];
+            nearest_pl = cur_pl;
         }
+
+        cur_pl_item = cur_pl_item->next;
     }
 
     return nearest_pl;
@@ -113,19 +108,25 @@ point_light * qsl_pl_nearest(Vec3f position) {
 point_light * qsl_pl_nearest_exclude(Vec3f position, point_light * exclude_light) {
     f32 smallest_dist = 99999.0f;
     point_light * nearest_pl = NULL;
+    list_item * cur_pl_item = qsl_point_light_list.start;
 
-    for(int i=0; i<qsl_point_light_count; i++) {
-        if (exclude_light == &qsl_point_light_pool[i]) {continue;}
+    while (cur_pl_item != NULL) {
+        point_light * cur_pl = (point_light *)cur_pl_item->data;
+        if (exclude_light == cur_pl) {
+            cur_pl_item = cur_pl_item->next;
+            continue;
+        }
+
         Vec3f transformed_light;
-        vec3f_diff(transformed_light, qsl_point_light_pool[i].position ,position);
-
+        vec3f_diff(transformed_light, cur_pl->position ,position);
         f32 dist = vec3_mag(transformed_light);
 
         if (dist < smallest_dist) {
             smallest_dist = dist;
-            qsl_second_nearest_pl = nearest_pl;
-            nearest_pl = &qsl_point_light_pool[i];
+            nearest_pl = cur_pl;
         }
+
+        cur_pl_item = cur_pl_item->next;
     }
 
     return nearest_pl;
@@ -257,8 +258,7 @@ void qsl_init_vtx_list(Vtx * terrain, int size) {
 };
 
 void qsl_update_vtx_list_light(Vtx * terrain, int size) {
-    if (qsl_point_light_count==0) {return;}
-
+    if (list_is_empty(&qsl_point_light_list)) {return NULL;}
     for (int i = 0; i < size; i++) {
         point_light * pl = qsl_pl_nearest(curr_qsl_dl->addr[qsl_vertex_index].position);
         color_u8 color = qsl_color_env(curr_qsl_dl->addr[qsl_vertex_index].position, curr_qsl_dl->addr[qsl_vertex_index].normal, pl);
@@ -456,8 +456,8 @@ void qsl_reset(void) {
     osStopThread(&gQuasilightThread);
     osDestroyThread(&gQuasilightThread);
     create_thread(&gQuasilightThread, THREAD_10_QUASILIGHT, qsl_update_vertex_iterator_thread10, NULL, gThread10Stack + THREAD10_STACK, 1);
-    qsl_point_light_count = 0;
     qsl_plane_light_count = 0;
+    list_clear(&qsl_point_light_list);
     for (int i = 0; i < qsl_dl_count; i++) {
         deallocate(qsl_dl_pool[i].addr);
     }
@@ -465,8 +465,7 @@ void qsl_reset(void) {
 }
 
 void qsl_process_object_light(Vec3f pos, struct Object * obj) {
-    if (qsl_point_light_count==0) {return NULL;}
-
+    if (list_is_empty(&qsl_point_light_list)) {return NULL;}
     if ((obj->pl)||(obj->header.gfx.node.flags & GRAPH_RENDER_BILLBOARD)) {
         //This object IS a light source or is billboarded!
         return NULL;
@@ -478,6 +477,7 @@ void qsl_process_object_light(Vec3f pos, struct Object * obj) {
     point_light * pl = qsl_pl_nearest(pos);
     if (pl==NULL) {return NULL;}
     point_light * pl2 = qsl_pl_nearest_exclude(pos,pl);
+    if (pl2==NULL) {return NULL;}
 
     vector_s8 point_dir = qsl_pl_direction(pos, pl);
     color_u8 point_col = qsl_pl_color(pos, pl);

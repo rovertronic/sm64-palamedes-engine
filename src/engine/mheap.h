@@ -13,7 +13,7 @@ typedef struct {
 // If a target unallocated block is very close to the desired size,
 // expand the block to fill it instead of splitting off a tiny chunk.
 #define DEFRAG_THRESHOLD 512
-#define HEAP_POOL 0x20000
+#define HEAP_POOL 0x30000
 
 extern u8 *gMemoryHeap;
 extern int gMemoryHeapSize;
