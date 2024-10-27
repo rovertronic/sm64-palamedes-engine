@@ -8,9 +8,11 @@ Features include:
 - Vertex Iterator: Level geometry animation, more information in `quasilight.c`.
 - Lighting Engine: Point lights, plane lights, and sunlight.
 - Advanced Shadows: Projected shadows, more information in `edging_shadow.c`.
+- Dynamic Memory: Heap Implementation + Linked Lists, more information in `mheap.c` and `linked_list.c`
 
 **Palamedes Engine Credits:**
 - **Fazana**: Multithreading implementation from m&m's
+- **Arthurtilly**: Memory heap implementation
 
 
 # HackerSM64 2.1 Information
